@@ -1,0 +1,14 @@
+name: Common Workflow
+
+on:
+  workflow_call:
+
+jobs:
+  add-to-project:
+    name: Add issue to CodeFlare Sprint Board
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v0.5.0
+        with:
+          project-url: https://github.com/orgs/project-codeflare/projects/8
+          github-token: ${{ secrets.CODEFLARE_MACHINE_ACCOUNT_TOKEN }}
