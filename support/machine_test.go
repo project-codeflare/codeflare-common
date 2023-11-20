@@ -3,11 +3,11 @@ package support
 /*import (
     "testing"
     "k8s.io/apimachinery/pkg/runtime"
-    
+
     "k8s.io/client-go/kubernetes/fake"
     "k8s.io/apimachinery/pkg/apis/meta/v1"
     "log"
-	
+
     machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 )
 
@@ -47,5 +47,3 @@ func TestGetMachineSets(t *testing.T) {
 	Expect(machineSets[0].Name).To(Equal("machine-set1"))
 }
 */
-
-

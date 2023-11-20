@@ -35,7 +35,7 @@ func Ingress(t Test, namespace, name string) func(g gomega.Gomega) *networkingv1
 
 func GetIngress(t Test, namespace, name string) *networkingv1.Ingress {
 	t.T().Helper()
-	
+
 	return Ingress(t, namespace, name)(t)
 }
 

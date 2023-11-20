@@ -82,9 +82,3 @@ func TestGetJob(t *testing.T) {
 	g.Expect(job.Namespace).To(gomega.Equal("my-namespace"))
 
 }
-
-
-
-
-
-
