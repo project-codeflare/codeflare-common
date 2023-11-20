@@ -93,11 +93,13 @@ func (t *T) Ctx() context.Context {
 func (t *T) Client() Client {
 	t.T().Helper()
 	t.once.client.Do(func() {
-		c, err := newTestClient()
-		if err != nil {
-			t.T().Fatalf("Error creating client: %v", err)
+		if t.client == nil {
+			c, err := newTestClient()
+			if err != nil {
+				t.T().Fatalf("Error creating client: %v", err)
+			}
+			t.client = c
 		}
-		t.client = c
 	})
 	return t.client
 }
