@@ -57,8 +57,8 @@ func TestGetPyTorchImage(t *testing.T) {
 	}
 }
 
-func TestGetClusterID(t *testing.T) {
-	os.Setenv("OsdClusterID", "my-cluster-id")
+func TestGetOsdClusterID(t *testing.T) {
+	os.Setenv(OsdClusterID, "my-cluster-id")
 	clusterId, ok := GetOsdClusterId()
 	if !ok {
 		t.Errorf("Expected GetOsdClusterId() to return true, but got false.")
