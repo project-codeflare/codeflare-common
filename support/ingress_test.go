@@ -35,7 +35,6 @@ func TestGetIngress(t *testing.T) {
 		core: fakeClient,
 	}
 
-
 	// Call the Ingress function using the fake client
 	ingressFunc := Ingress(test, "my-namespace", "my-ingress-1")
 	ingress := ingressFunc(g)
