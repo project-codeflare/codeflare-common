@@ -80,3 +80,47 @@ func TestGetInstascaleOcmSecret(t *testing.T) {
 	}
 
 }
+
+func TestGetClusterType(t *testing.T) {
+	tests := []struct {
+		name        string
+		envVarValue string
+		expected    ClusterType
+	}{
+		{
+			name:        "OSD cluster",
+			envVarValue: "OSD",
+			expected:    OsdCluster,
+		},
+		{
+			name:        "OCP cluster",
+			envVarValue: "OCP",
+			expected:    OcpCluster,
+		},
+		{
+			name:        "Hypershift cluster",
+			envVarValue: "HYPERSHIFT",
+			expected:    HypershiftCluster,
+		},
+		{
+			name:        "KIND cluster",
+			envVarValue: "KIND",
+			expected:    KindCluster,
+		},
+		{
+			name:        "Undefined cluster",
+			envVarValue: "INVALID",
+			expected:    UndefinedCluster,
+		},
+	}
+	ttt := With(t)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			os.Setenv(ClusterTypeEnvVar, tt.envVarValue)
+			actual := GetClusterType(ttt) // Pass tt as an argument to GetClusterType
+			if actual != tt.expected {
+				t.Errorf("Expected GetClusterType() to return %v, but got %v", tt.expected, actual)
+			}
+		})
+	}
+}

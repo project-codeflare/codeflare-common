@@ -17,8 +17,7 @@ limitations under the License.
 package support
 
 import (
-	"context"
-	"fmt"
+
 	"testing"
 
 	"github.com/onsi/gomega"
@@ -48,16 +47,6 @@ func TestGetJob(t *testing.T) {
 	}
 	fakeClient := NewFakeKubeClientWithObjects(fakeJobs...)
 
-	// Explicitly create the jobs in the fake client.
-	for _, obj := range fakeJobs {
-		job, ok := obj.(*batchv1.Job)
-		if !ok {
-			t.Fatalf("Expected object of type *batchv1.Job, got %T", obj)
-		}
-		_, err := fakeClient.BatchV1().Jobs(job.Namespace).Create(context.TODO(), job, metav1.CreateOptions{})
-		g.Expect(err).To(gomega.HaveOccurred())
-	}
-
 	test := With(t).(*T)
 	test.client = &testClient{
 		core: fakeClient,
@@ -75,7 +64,7 @@ func TestGetJob(t *testing.T) {
 	jobFunc := Job(test, "my-namespace", "my-job-1")
 	job := jobFunc(g)
 
-	fmt.Printf("Retrieved job object: %+v\n", job)
+	//fmt.Printf("Retrieved job object: %+v\n", job)
 
 	// Assertions
 	g.Expect(job.Name).To(gomega.Equal("my-job-1"))
