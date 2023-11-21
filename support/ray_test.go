@@ -2,7 +2,6 @@ package support
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/onsi/gomega"
@@ -39,7 +38,7 @@ func TestGetRayJob(t *testing.T) {
 	err := fakeClient.Get(context.TODO(), client.ObjectKey{Name: "my-job-1", Namespace: "my-namespace"}, rayJob)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	fmt.Printf("Retrieved job object: %+v\n", rayJob)
+	//fmt.Printf("Retrieved job object: %+v\n", rayJob)
 
 	g.Expect(rayJob.Name).To(gomega.Equal("my-job-1"))
 	g.Expect(rayJob.Namespace).To(gomega.Equal("my-namespace"))
