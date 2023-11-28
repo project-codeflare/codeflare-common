@@ -50,14 +50,6 @@ func TestGetJob(t *testing.T) {
 	test.client = &testClient{
 		core: fakeClient,
 	}
-	//	testInstance := &T{
-	//		WithT: gomega.NewWithT(t),
-	//		t:     t,
-	//		ctx:   ctx,
-	//		client: &testClient{
-	//			core: fakeClient,
-	//		},
-	//	}
 
 	// Call the Job function using the fake client
 	jobFunc := Job(test, "my-namespace", "my-job-1")

@@ -1,42 +1,47 @@
 package support
 
-/*
 import (
+	"context"
 	"testing"
 
 	"github.com/onsi/gomega"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	imagev1 "github.com/openshift/api/image/v1"
 )
 
+func NewFakeKubeClientWithImages(scheme *runtime.Scheme, objects ...client.Object) client.Client {
+	return fake.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).Build()
+}
+
 func TestGetImageStream(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
+	scheme := runtime.NewScheme()
+	_ = imagev1.AddToScheme(scheme)
+
 	// Create a fake client that returns different ImageStream objects.
-	fakeImageStream := []runtime.Object{
+	fakeImageStream := []client.Object{
 		&imagev1.ImageStream{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-imagestream-1",
+				Name:      "my-imagestream-1", // Corrected name
 				Namespace: "my-namespace",
 			},
 		},
 	}
-	fakeClient := NewFakeKubeClientWithObjects(fakeImageStream...)
+	fakeClient := NewFakeKubeClientWithImages(scheme, fakeImageStream...)
 
-	test := With(t).(*T)
-	test.client = &testClient{
-		core: fakeClient,
-	}
+	image := &imagev1.ImageStream{}
 
 	// Call the ImageStream function using the fake client
-	imageStream := GetImageStream(test, "my-namespace", "my-image-stream")
 
+	err := fakeClient.Get(context.TODO(), client.ObjectKey{Name: "my-imagestream-1", Namespace: "my-namespace"}, image)
+	g.Expect(err).ToNot(gomega.HaveOccurred())
 	// Assertions
-	g.Expect(imageStream.Name).To(gomega.Equal("my-image-stream"))
-	g.Expect(imageStream.Namespace).To(gomega.Equal("my-namespace"))
-
+	g.Expect(image.Name).To(gomega.Equal("my-imagestream-1")) // Corrected name
+	g.Expect(image.Namespace).To(gomega.Equal("my-namespace"))
 }
-*/
