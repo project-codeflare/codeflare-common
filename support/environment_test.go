@@ -1,8 +1,11 @@
 package support
 
 import (
+	"fmt"
 	"os"
 	"testing"
+
+	"github.com/onsi/gomega"
 )
 
 func TestGetCodeFlareSDKVersion(t *testing.T) {
@@ -14,7 +17,8 @@ func TestGetCodeFlareSDKVersion(t *testing.T) {
 
 	// Assert that the version is correct.
 	if version != "1.2.3" {
-		t.Errorf("Expected version 1.2.3, but got %s", version)
+		gomega.Expect(version).To(gomega.Equal("1.2.3"), "Expected version 1.2.3, but got %s", version)
+
 	}
 }
 
@@ -27,7 +31,7 @@ func TestGetRayVersion(t *testing.T) {
 
 	// Assert that the version is correct.
 	if version != "1.4.5" {
-		t.Errorf("Expected version 1.4.5, but got %s", version)
+		gomega.Expect(version).To(gomega.Equal("1.2.3"), "Expected version 1.4.5, but got %s", version)
 	}
 }
 
@@ -40,7 +44,8 @@ func TestGetRayImage(t *testing.T) {
 
 	// Assert that the image is correct.
 	if image != "ray/ray:latest" {
-		t.Errorf("Expected image ray/ray:latest, but got %s", image)
+		gomega.Expect(image).To(gomega.Equal("ray/ray:latest"), "Expected image ray/ray:latest, but got %s", image)
+
 	}
 }
 
@@ -53,7 +58,8 @@ func TestGetPyTorchImage(t *testing.T) {
 
 	// Assert that the image is correct.
 	if image != "pytorch/pytorch:latest" {
-		t.Errorf("Expected image pytorch/pytorch:latest, but got %s", image)
+		gomega.Expect(image).To(gomega.Equal("pytorch/pytorch:latest"), "Expected image pytorch/pytorch:latest, but got %s", image)
+
 	}
 }
 
@@ -61,10 +67,10 @@ func TestGetOsdClusterID(t *testing.T) {
 	os.Setenv(OsdClusterID, "my-cluster-id")
 	clusterId, ok := GetOsdClusterId()
 	if !ok {
-		t.Errorf("Expected GetOsdClusterId() to return true, but got false.")
+		gomega.Expect(ok).To(gomega.BeTrue(), "Expected GetOsdClusterId() to return true, but got false.")
 	}
 	if clusterId != "my-cluster-id" {
-		t.Errorf("Expected GetOsdClusterId() to return 'my-cluster-id', but got '%s'.", clusterId)
+		gomega.Expect(clusterId).To(gomega.Equal("my-cluster-id"), "Expected GetOsdClusterId() to return 'my-cluster-id', but got '%s'.", clusterId)
 	}
 
 }
@@ -76,7 +82,12 @@ func TestGetInstascaleOcmSecret(t *testing.T) {
 
 	// Verify that the namespace and secret name are correct.
 	if namespace != "default" || secretName != "instascale-ocm-secret" {
-		t.Errorf("Expected GetInstascaleOcmSecret() to return 'default/instascale-ocm-secret', but got '%s/%s'.", namespace, secretName)
+		gomega.Expect(fmt.Sprintf("%s/%s", namespace, secretName)).To(
+			gomega.Equal("default/instascale-ocm-secret"),
+			"Expected GetInstascaleOcmSecret() to return 'default/instascale-ocm-secret', but got '%s/%s'.",
+			namespace, secretName,
+		)
+
 	}
 
 }
@@ -119,7 +130,11 @@ func TestGetClusterType(t *testing.T) {
 			os.Setenv(ClusterTypeEnvVar, tt.envVarValue)
 			actual := GetClusterType(ttt) // Pass tt as an argument to GetClusterType
 			if actual != tt.expected {
-				t.Errorf("Expected GetClusterType() to return %v, but got %v", tt.expected, actual)
+				gomega.Expect(actual).To(
+					gomega.Equal(tt.expected),
+					"Expected GetClusterType() to return %v, but got %v", tt.expected, actual,
+				)
+
 			}
 		})
 	}
