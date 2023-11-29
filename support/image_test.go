@@ -24,11 +24,10 @@ func TestGetImageStream(t *testing.T) {
 	scheme := runtime.NewScheme()
 	_ = imagev1.AddToScheme(scheme)
 
-	// Create a fake client that returns different ImageStream objects.
 	fakeImageStream := []client.Object{
 		&imagev1.ImageStream{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-imagestream-1", // Corrected name
+				Name:      "my-imagestream-1",
 				Namespace: "my-namespace",
 			},
 		},
@@ -37,11 +36,9 @@ func TestGetImageStream(t *testing.T) {
 
 	image := &imagev1.ImageStream{}
 
-	// Call the ImageStream function using the fake client
-
 	err := fakeClient.Get(context.TODO(), client.ObjectKey{Name: "my-imagestream-1", Namespace: "my-namespace"}, image)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	// Assertions
-	g.Expect(image.Name).To(gomega.Equal("my-imagestream-1")) // Corrected name
+	g.Expect(image.Name).To(gomega.Equal("my-imagestream-1"))
 	g.Expect(image.Namespace).To(gomega.Equal("my-namespace"))
 }
