@@ -1,49 +1,45 @@
 package support
 
-/*import (
-    "testing"
-    "k8s.io/apimachinery/pkg/runtime"
+import (
+	"context"
+	"testing"
 
-    "k8s.io/client-go/kubernetes/fake"
-    "k8s.io/apimachinery/pkg/apis/meta/v1"
-    "log"
+	"github.com/onsi/gomega"
 
-    machinev1beta1 "github.com/openshift/api/machine/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 )
 
-func NewFakeKubeClientMachine(objects ...runtime.Object) *fake.Clientset {
-    fakeClient := fake.NewSimpleClientset(objects...)
-    return fakeClient
+func NewFakeKubeClientWithMachines(scheme *runtime.Scheme, objects ...client.Object) client.Client {
+	return fake.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).Build()
 }
-
-
-
 
 func TestGetMachineSets(t *testing.T) {
-	t.Parallel()
+	g := gomega.NewGomegaWithT(t)
 
-	// Create a mock machineSet object
-	machineSet1 := &machinev1beta1.MachineSet{
-		ObjectMeta: v1.ObjectMeta{
-			Name: "machine-set1",
+	scheme := runtime.NewScheme()
+	_ = machinev1beta1.AddToScheme(scheme)
+
+	testmachines := []client.Object{
+		&machinev1beta1.MachineSet{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-machineset-1",
+				Namespace: "openshift-machine-api",
+			},
 		},
 	}
+	fakeClient := NewFakeKubeClientWithMachines(scheme, testmachines...)
 
-	// Create a mock clientset
-	clientset := NewFakeKubeClientMachine(machineSet1)
+	machine := &machinev1beta1.MachineSet{}
+	err := fakeClient.Get(context.TODO(), client.ObjectKey{Name: "test-machineset-1", Namespace: "openshift-machine-api"}, machine)
+	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	// Call the GetMachineSets function with the clientset
-	machineSets, err := GetMachineSets(clientset)
+	// Assertions
+	g.Expect(machine.Name).To(gomega.Equal("test-machineset-1"))
+	g.Expect(machine.Namespace).To(gomega.Equal("openshift-machine-api"))
 
-	if err != nil {
-		// Handle the error here
-		log.Println("Error:", err)
-		return
-	}
-
-	// Assert that the returned machineSets slice is equal to the expected slice
-	RegisterTestingT(t)
-	Expect(machineSets).To(HaveLen(1))
-	Expect(machineSets[0].Name).To(Equal("machine-set1"))
 }
-*/
