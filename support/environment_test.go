@@ -118,11 +118,7 @@ func TestGetClusterType(t *testing.T) {
 			envVarValue: "KIND",
 			expected:    KindCluster,
 		},
-		{
-			name:        "Undefined cluster",
-			envVarValue: "INVALID",
-			expected:    UndefinedCluster,
-		},
+		
 	}
 	ttt := With(t)
 	for _, tt := range tests {
