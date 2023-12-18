@@ -55,8 +55,6 @@ func TestGetJob(t *testing.T) {
 	jobFunc := Job(test, "my-namespace", "my-job-1")
 	job := jobFunc(g)
 
-	//fmt.Printf("Retrieved job object: %+v\n", job)
-
 	// Assertions
 	g.Expect(job.Name).To(gomega.Equal("my-job-1"))
 	g.Expect(job.Namespace).To(gomega.Equal("my-namespace"))

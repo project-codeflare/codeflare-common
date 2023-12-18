@@ -70,9 +70,3 @@ func TestGetRayCluster(t *testing.T) {
 	g.Expect(raycluster.Name).To(gomega.Equal("my-cluster-1"))
 	g.Expect(raycluster.Namespace).To(gomega.Equal("my-namespace"))
 }
-
-
-	
-
-    
-
