@@ -1,4 +1,5 @@
 package support
+
 /*
 import (
 	"testing"
@@ -34,3 +35,4 @@ func TestGetMachinePools(t *testing.T) {
 	test.Expect(machinePools).Should(gomega.HaveLen(1), "Expected 1 machine pool, but got %d", len(machinePools))
 }
 */
+

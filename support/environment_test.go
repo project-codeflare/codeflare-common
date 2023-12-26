@@ -63,6 +63,7 @@ func TestGetPyTorchImage(t *testing.T) {
 	}
 }
 
+
 func TestGetClusterID(t *testing.T) {
 	os.Setenv(ClusterID, "my-cluster-id")
 	clusterId, ok := GetClusterId()
@@ -72,8 +73,8 @@ func TestGetClusterID(t *testing.T) {
 	if clusterId != "my-cluster-id" {
 		gomega.Expect(clusterId).To(gomega.Equal("my-cluster-id"), "Expected GetClusterId() to return 'my-cluster-id', but got '%s'.", clusterId)
 	}
-
 }
+
 func TestGetInstascaleOcmSecret(t *testing.T) {
 	// Set the Instascale OCM secret environment variable.
 	os.Setenv(InstaScaleOcmSecret, "default/instascale-ocm-secret")
@@ -118,6 +119,7 @@ func TestGetClusterType(t *testing.T) {
 			envVarValue: "KIND",
 			expected:    KindCluster,
 		},
+
 	}
 	ttt := With(t)
 	for _, tt := range tests {
