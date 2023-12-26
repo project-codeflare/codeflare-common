@@ -63,14 +63,14 @@ func TestGetPyTorchImage(t *testing.T) {
 	}
 }
 
-func TestGetOsdClusterID(t *testing.T) {
-	os.Setenv(OsdClusterID, "my-cluster-id")
-	clusterId, ok := GetOsdClusterId()
+func TestGetClusterID(t *testing.T) {
+	os.Setenv(ClusterID, "my-cluster-id")
+	clusterId, ok := GetClusterId()
 	if !ok {
-		gomega.Expect(ok).To(gomega.BeTrue(), "Expected GetOsdClusterId() to return true, but got false.")
+		gomega.Expect(ok).To(gomega.BeTrue(), "Expected GetClusterId() to return true, but got false.")
 	}
 	if clusterId != "my-cluster-id" {
-		gomega.Expect(clusterId).To(gomega.Equal("my-cluster-id"), "Expected GetOsdClusterId() to return 'my-cluster-id', but got '%s'.", clusterId)
+		gomega.Expect(clusterId).To(gomega.Equal("my-cluster-id"), "Expected GetClusterId() to return 'my-cluster-id', but got '%s'.", clusterId)
 	}
 
 }
@@ -118,7 +118,6 @@ func TestGetClusterType(t *testing.T) {
 			envVarValue: "KIND",
 			expected:    KindCluster,
 		},
-		
 	}
 	ttt := With(t)
 	for _, tt := range tests {
