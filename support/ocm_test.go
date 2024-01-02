@@ -33,4 +33,3 @@ func TestGetMachinePools(t *testing.T) {
 }
 
 */
-

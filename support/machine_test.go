@@ -44,8 +44,6 @@ func TestGetMachineSets(t *testing.T) {
 
 }
 
-
-
 /*
 import (
 
@@ -166,5 +164,3 @@ func TestGetMachines(t *testing.T) {
 	})
 }
 */
-
-

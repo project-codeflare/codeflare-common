@@ -63,8 +63,6 @@ func TestGetPyTorchImage(t *testing.T) {
 	}
 }
 
-<<<<<<< HEAD
-
 func TestGetClusterID(t *testing.T) {
 	os.Setenv(ClusterID, "my-cluster-id")
 	clusterId, ok := GetClusterId()
@@ -120,11 +118,6 @@ func TestGetClusterType(t *testing.T) {
 			envVarValue: "KIND",
 			expected:    KindCluster,
 		},
-<<<<<<< HEAD
-
-=======
-		
->>>>>>> b7de4530b50b2f66481ecfff5ef13f6de6cd3228
 	}
 	ttt := With(t)
 	for _, tt := range tests {
