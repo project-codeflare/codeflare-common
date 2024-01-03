@@ -123,7 +123,7 @@ func TestGetClusterType(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			os.Setenv(ClusterTypeEnvVar, tt.envVarValue)
-			actual := GetClusterType(ttt) // Pass tt as an argument to GetClusterType
+			actual := GetClusterType(ttt)
 			if actual != tt.expected {
 				gomega.Expect(actual).To(
 					gomega.Equal(tt.expected),

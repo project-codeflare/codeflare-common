@@ -1,5 +1,7 @@
 package support
 
+// Need to MOck OCM COnnection
+
 /*
 import (
 	"testing"
@@ -13,7 +15,7 @@ import (
 func TestGetMachinePools(t *testing.T) {
 	// Create a fake OpenShift client for testing
 	fakeClient := fake.NewSimpleClientset(machinePool{
-		MachinePool: &cmv1.MachinePool{
+		 &cmv1.MachinePool{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-machinepool",
 				Namespace: "test-namespace",

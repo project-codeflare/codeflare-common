@@ -13,7 +13,7 @@ import (
 func TestGetIngress(t *testing.T) {
 
 	g := gomega.NewGomegaWithT(t)
-	// Create a fake client that returns different Ingress objects.
+	// Create a fake client that returns Ingress objects.
 	fakeIngress := []runtime.Object{
 		&networkingv1.Ingress{
 			ObjectMeta: metav1.ObjectMeta{
@@ -33,9 +33,6 @@ func TestGetIngress(t *testing.T) {
 	ingressFunc := Ingress(test, "my-namespace", "my-ingress-1")
 	ingress := ingressFunc(g)
 
-	//fmt.Printf("Retrieved ingress object: %+v\n", ingress)
-
-	// Assertions
 	g.Expect(ingress.Name).To(gomega.Equal("my-ingress-1"))
 	g.Expect(ingress.Namespace).To(gomega.Equal("my-namespace"))
 }

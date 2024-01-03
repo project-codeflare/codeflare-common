@@ -34,7 +34,6 @@ func TestGetRoute(t *testing.T) {
 	err := fakeClient.Get(context.TODO(), client.ObjectKey{Name: "test-1", Namespace: "my-namespace"}, route)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	// Assertions
 	g.Expect(route.Name).To(gomega.Equal("test-1"))
 	g.Expect(route.Namespace).To(gomega.Equal("my-namespace"))
 

@@ -29,7 +29,7 @@ import (
 func TestGetJob(t *testing.T) {
 
 	g := gomega.NewGomegaWithT(t)
-	// Create a fake client that returns different Job objects.
+
 	fakeJobs := []runtime.Object{
 		&batchv1.Job{
 			ObjectMeta: metav1.ObjectMeta{
@@ -49,7 +49,6 @@ func TestGetJob(t *testing.T) {
 	jobFunc := Job(test, "my-namespace", "my-job-1")
 	job := jobFunc(g)
 
-	// Assertions
 	g.Expect(job.Name).To(gomega.Equal("my-job-1"))
 	g.Expect(job.Namespace).To(gomega.Equal("my-namespace"))
 

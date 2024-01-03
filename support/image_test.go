@@ -33,7 +33,6 @@ func TestGetImageStream(t *testing.T) {
 
 	err := fakeClient.Get(context.TODO(), client.ObjectKey{Name: "my-imagestream-1", Namespace: "my-namespace"}, image)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
-	// Assertions
 	g.Expect(image.Name).To(gomega.Equal("my-imagestream-1"))
 	g.Expect(image.Namespace).To(gomega.Equal("my-namespace"))
 }
