@@ -8,13 +8,7 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes/fake"
 )
-
-func NewFakeKubeClientForIngress(objects ...runtime.Object) *fake.Clientset {
-	fakeClient := fake.NewSimpleClientset(objects...)
-	return fakeClient
-}
 
 func TestGetIngress(t *testing.T) {
 
@@ -28,7 +22,7 @@ func TestGetIngress(t *testing.T) {
 			},
 		},
 	}
-	fakeClient := NewFakeKubeClientForIngress(fakeIngress...)
+	fakeClient := NewFakeKubeClientWithObjects(fakeIngress...)
 
 	test := With(t).(*T)
 	test.client = &testClient{

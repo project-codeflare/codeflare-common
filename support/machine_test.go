@@ -9,14 +9,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 )
-
-func NewFakeKubeClientWithMachines(scheme *runtime.Scheme, objects ...client.Object) client.Client {
-	return fake.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).Build()
-}
 
 func TestGetMachineSets(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
@@ -32,7 +27,7 @@ func TestGetMachineSets(t *testing.T) {
 			},
 		},
 	}
-	fakeClient := NewFakeKubeClientWithMachines(scheme, testmachines...)
+	fakeClient := NewFakeKubeClientWithScheme(scheme, testmachines...)
 
 	machine := &machinev1beta1.MachineSet{}
 	err := fakeClient.Get(context.TODO(), client.ObjectKey{Name: "test-machineset-1", Namespace: "openshift-machine-api"}, machine)
@@ -43,7 +38,6 @@ func TestGetMachineSets(t *testing.T) {
 	g.Expect(machine.Namespace).To(gomega.Equal("openshift-machine-api"))
 
 }
-
 
 /*
 import (

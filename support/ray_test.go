@@ -10,12 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
-
-func NewFakeClient(scheme *runtime.Scheme, objects ...client.Object) client.Client {
-	return fake.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).Build()
-}
 
 func TestGetRayJob(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
@@ -32,7 +27,7 @@ func TestGetRayJob(t *testing.T) {
 		},
 	}
 
-	fakeClient := NewFakeClient(scheme, fakeRayJobs...)
+	fakeClient := NewFakeKubeClientWithScheme(scheme, fakeRayJobs...)
 
 	rayJob := &rayv1alpha1.RayJob{}
 	err := fakeClient.Get(context.TODO(), client.ObjectKey{Name: "my-job-1", Namespace: "my-namespace"}, rayJob)
@@ -59,7 +54,7 @@ func TestGetRayCluster(t *testing.T) {
 		},
 	}
 
-	fakeClient := NewFakeClient(scheme, fakeRayCluster...)
+	fakeClient := NewFakeKubeClientWithScheme(scheme, fakeRayCluster...)
 
 	raycluster := &rayv1alpha1.RayCluster{}
 	err := fakeClient.Get(context.TODO(), client.ObjectKey{Name: "my-cluster-1", Namespace: "my-namespace"}, raycluster)

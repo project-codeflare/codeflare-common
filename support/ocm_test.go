@@ -1,7 +1,6 @@
 package support
 
 /*
-
 import (
 	"testing"
 	"github.com/onsi/gomega"
@@ -31,5 +30,4 @@ func TestGetMachinePools(t *testing.T) {
 	machinePools := GetMachinePools(test, &ocmsdk.Connection{})
 	test.Expect(machinePools).Should(gomega.HaveLen(1), "Expected 1 machine pool, but got %d", len(machinePools))
 }
-
 */
