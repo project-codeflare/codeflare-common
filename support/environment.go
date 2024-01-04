@@ -44,6 +44,9 @@ const (
 
 	// Hostname of the Kubernetes cluster
 	ClusterHostname = "CLUSTER_HOSTNAME"
+
+	// The name of Kueue ClusterQueue CR, required for Kueue LocalQueue creation.
+	KueueClusterQueueName = "KUEUE_CLUSTER_QUEUE_NAME"
 )
 
 type ClusterType string
@@ -108,6 +111,14 @@ func GetClusterHostname(t Test) string {
 		t.T().Fatalf("Expected environment variable %s not found, please define cluster hostname.", ClusterHostname)
 	}
 	return hostname
+}
+
+func GetKueueClusterQueueName(t Test) string {
+	clusterQueueName, ok := os.LookupEnv(KueueClusterQueueName)
+	if !ok {
+		t.T().Fatalf("Expected environment variable %s not found, please define name of Kueue ClusterQueue CR.", KueueClusterQueueName)
+	}
+	return clusterQueueName
 }
 
 func lookupEnvOrDefault(key, value string) string {

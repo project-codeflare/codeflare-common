@@ -19,6 +19,7 @@ package support
 import (
 	mcadclient "github.com/project-codeflare/multi-cluster-app-dispatcher/pkg/client/clientset/versioned"
 	rayclient "github.com/ray-project/kuberay/ray-operator/pkg/client/clientset/versioned"
+	kueueclient "sigs.k8s.io/kueue/client-go/clientset/versioned"
 
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -38,6 +39,7 @@ type Client interface {
 	Route() routev1.Interface
 	Image() imagev1.Interface
 	MCAD() mcadclient.Interface
+	Kueue() kueueclient.Interface
 	Ray() rayclient.Interface
 	Dynamic() dynamic.Interface
 }
@@ -48,6 +50,7 @@ type testClient struct {
 	route   routev1.Interface
 	image   imagev1.Interface
 	mcad    mcadclient.Interface
+	kueue   kueueclient.Interface
 	ray     rayclient.Interface
 	dynamic dynamic.Interface
 }
@@ -69,8 +72,13 @@ func (t *testClient) Route() routev1.Interface {
 func (t *testClient) Image() imagev1.Interface {
 	return t.image
 }
+
 func (t *testClient) MCAD() mcadclient.Interface {
 	return t.mcad
+}
+
+func (t *testClient) Kueue() kueueclient.Interface {
+	return t.kueue
 }
 
 func (t *testClient) Ray() rayclient.Interface {
@@ -115,6 +123,11 @@ func newTestClient() (Client, error) {
 		return nil, err
 	}
 
+	kueueClient, err := kueueclient.NewForConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	rayClient, err := rayclient.NewForConfig(cfg)
 	if err != nil {
 		return nil, err
@@ -131,6 +144,7 @@ func newTestClient() (Client, error) {
 		route:   routeClient,
 		image:   imageClient,
 		mcad:    mcadClient,
+		kueue:   kueueClient,
 		ray:     rayClient,
 		dynamic: dynamicClient,
 	}, nil
