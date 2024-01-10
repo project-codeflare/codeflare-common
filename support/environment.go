@@ -44,6 +44,9 @@ const (
 
 	// Hostname of the Kubernetes cluster
 	ClusterHostname = "CLUSTER_HOSTNAME"
+
+	// URL for downloading MNIST dataset
+	mnistDatasetURL = "MNIST_DATASET_URL"
 )
 
 type ClusterType string
@@ -108,6 +111,10 @@ func GetClusterHostname(t Test) string {
 		t.T().Fatalf("Expected environment variable %s not found, please define cluster hostname.", ClusterHostname)
 	}
 	return hostname
+}
+
+func GetMnistDatasetURL() string {
+	return lookupEnvOrDefault(mnistDatasetURL, "http://yann.lecun.com/exdb/mnist/")
 }
 
 func lookupEnvOrDefault(key, value string) string {
