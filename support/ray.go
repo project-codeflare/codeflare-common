@@ -42,6 +42,10 @@ func RayJobStatus(job *rayv1.RayJob) rayv1.JobStatus {
 	return job.Status.JobStatus
 }
 
+func RayJobId(job *rayv1.RayJob) string {
+	return job.Status.JobId
+}
+
 func GetRayJobId(t Test, namespace, name string) string {
 	t.T().Helper()
 	job := RayJob(t, namespace, name)(t)
