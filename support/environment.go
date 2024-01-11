@@ -87,7 +87,7 @@ func GetClusterId() (string, bool) {
 func GetClusterType(t Test) ClusterType {
 	clusterType, ok := os.LookupEnv(ClusterTypeEnvVar)
 	if !ok {
-		t.T().Logf("Expected environment variable %s not found, cluster type is not defined.", ClusterTypeEnvVar)
+		t.T().Logf("Environment variable %s is unset.", ClusterTypeEnvVar)
 		return UndefinedCluster
 	}
 	switch clusterType {
@@ -100,7 +100,7 @@ func GetClusterType(t Test) ClusterType {
 	case "KIND":
 		return KindCluster
 	default:
-		t.T().Logf("Expected environment variable %s contains unexpected value: '%s'", ClusterTypeEnvVar, clusterType)
+		t.T().Logf("Environment variable %s is unset or contains an incorrect value: '%s'", ClusterTypeEnvVar, clusterType)
 		return UndefinedCluster
 	}
 }
