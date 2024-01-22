@@ -26,6 +26,7 @@ import (
 	"github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/rest"
 )
 
 type Test interface {
@@ -54,8 +55,13 @@ func (o errorOption[T]) applyTo(to T) error {
 var _ Option[any] = errorOption[any](nil)
 
 func With(t *testing.T) Test {
+	return WithConfig(t, nil)
+}
+
+func WithConfig(t *testing.T, cfg *rest.Config) Test {
 	t.Helper()
 	ctx := context.Background()
+
 	if deadline, ok := t.Deadline(); ok {
 		withDeadline, cancel := context.WithDeadline(ctx, deadline)
 		t.Cleanup(cancel)
@@ -66,6 +72,7 @@ func With(t *testing.T) Test {
 		WithT: gomega.NewWithT(t),
 		t:     t,
 		ctx:   ctx,
+		cfg:   cfg,
 	}
 }
 
@@ -75,6 +82,7 @@ type T struct {
 	// nolint: containedctx
 	ctx       context.Context
 	client    Client
+	cfg       *rest.Config
 	outputDir string
 	once      struct {
 		client    sync.Once
@@ -94,7 +102,7 @@ func (t *T) Client() Client {
 	t.T().Helper()
 	t.once.client.Do(func() {
 		if t.client == nil {
-			c, err := newTestClient()
+			c, err := newTestClient(t.cfg)
 			if err != nil {
 				t.T().Fatalf("Error creating client: %v", err)
 			}

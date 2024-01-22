@@ -23,6 +23,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	imagev1 "github.com/openshift/client-go/image/clientset/versioned"
@@ -81,13 +82,16 @@ func (t *testClient) Dynamic() dynamic.Interface {
 	return t.dynamic
 }
 
-func newTestClient() (Client, error) {
-	cfg, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		clientcmd.NewDefaultClientConfigLoadingRules(),
-		&clientcmd.ConfigOverrides{},
-	).ClientConfig()
-	if err != nil {
-		return nil, err
+func newTestClient(cfg *rest.Config) (Client, error) {
+	var err error
+	if cfg == nil {
+		cfg, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			clientcmd.NewDefaultClientConfigLoadingRules(),
+			&clientcmd.ConfigOverrides{},
+		).ClientConfig()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	kubeClient, err := kubernetes.NewForConfig(cfg)
