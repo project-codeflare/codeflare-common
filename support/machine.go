@@ -30,3 +30,15 @@ func GetMachines(t Test, machineSetName string) []machinev1beta1.Machine {
 func MachineSetId(machineSet machinev1beta1.MachineSet) string {
 	return machineSet.Name
 }
+
+func MachineSet(t Test, namespace string, machineSetName string) func(g gomega.Gomega) *machinev1beta1.MachineSet {
+	return func(g gomega.Gomega) *machinev1beta1.MachineSet {
+		machineset, err := t.Client().Machine().MachineV1beta1().MachineSets(namespace).Get(t.Ctx(), machineSetName, metav1.GetOptions{})
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+		return machineset
+	}
+}
+
+func MachineSetReplicas(machineSet *machinev1beta1.MachineSet) *int32 {
+	return machineSet.Spec.Replicas
+}
