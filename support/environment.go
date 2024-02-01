@@ -47,6 +47,10 @@ const (
 
 	// URL for downloading MNIST dataset
 	mnistDatasetURL = "MNIST_DATASET_URL"
+
+	// URL for PiPI index containing all the required test Python packages
+	pipIndexURL    = "PIP_INDEX_URL"
+	pipTrustedHost = "PIP_TRUSTED_HOST"
 )
 
 type ClusterType string
@@ -115,6 +119,14 @@ func GetClusterHostname(t Test) string {
 
 func GetMnistDatasetURL() string {
 	return lookupEnvOrDefault(mnistDatasetURL, "http://yann.lecun.com/exdb/mnist/")
+}
+
+func GetPipIndexURL() string {
+	return lookupEnvOrDefault(pipIndexURL, "https://pypi.python.org/simple")
+}
+
+func GetPipTrustedHost() string {
+	return lookupEnvOrDefault(pipTrustedHost, "")
 }
 
 func lookupEnvOrDefault(key, value string) string {
