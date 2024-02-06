@@ -34,6 +34,7 @@ runs:
 
         # Cleanup
         rm ca.crt
+        rm ca.srl
         rm ca.key
         rm user.crt
         rm user.key
