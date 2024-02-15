@@ -45,7 +45,7 @@ runs:
         EOF'
 
     - name: Setup KinD cluster
-      uses: helm/kind-action@v1.8.0
+      uses: helm/kind-action@v1.9.0
       with:
         cluster_name: ${{ inputs.cluster-name }}
         version: v0.17.0
