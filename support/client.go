@@ -18,7 +18,6 @@ package support
 
 import (
 	kubeflowclient "github.com/kubeflow/training-operator/pkg/client/clientset/versioned"
-	mcadclient "github.com/project-codeflare/multi-cluster-app-dispatcher/pkg/client/clientset/versioned"
 	rayclient "github.com/ray-project/kuberay/ray-operator/pkg/client/clientset/versioned"
 
 	"k8s.io/client-go/dynamic"
@@ -40,20 +39,18 @@ type Client interface {
 	Machine() machinev1.Interface
 	Route() routev1.Interface
 	Image() imagev1.Interface
-	MCAD() mcadclient.Interface
 	Ray() rayclient.Interface
 	Dynamic() dynamic.Interface
 }
 
 type testClient struct {
-	core     kubernetes.Interface
+	core    kubernetes.Interface
 	kubeflow kubeflowclient.Interface
-	machine  machinev1.Interface
-	route    routev1.Interface
-	image    imagev1.Interface
-	mcad     mcadclient.Interface
-	ray      rayclient.Interface
-	dynamic  dynamic.Interface
+	machine machinev1.Interface
+	route   routev1.Interface
+	image   imagev1.Interface
+	ray     rayclient.Interface
+	dynamic dynamic.Interface
 }
 
 var _ Client = (*testClient)(nil)
@@ -76,9 +73,6 @@ func (t *testClient) Route() routev1.Interface {
 
 func (t *testClient) Image() imagev1.Interface {
 	return t.image
-}
-func (t *testClient) MCAD() mcadclient.Interface {
-	return t.mcad
 }
 
 func (t *testClient) Ray() rayclient.Interface {
@@ -126,11 +120,6 @@ func newTestClient(cfg *rest.Config) (Client, error) {
 		return nil, err
 	}
 
-	mcadClient, err := mcadclient.NewForConfig(cfg)
-	if err != nil {
-		return nil, err
-	}
-
 	rayClient, err := rayclient.NewForConfig(cfg)
 	if err != nil {
 		return nil, err
@@ -142,6 +131,7 @@ func newTestClient(cfg *rest.Config) (Client, error) {
 	}
 
 	return &testClient{
+<<<<<<< HEAD
 		core:     kubeClient,
 		kubeflow: kubeflowClient,
 		machine:  machineClient,
@@ -150,5 +140,13 @@ func newTestClient(cfg *rest.Config) (Client, error) {
 		mcad:     mcadClient,
 		ray:      rayClient,
 		dynamic:  dynamicClient,
+=======
+		core:    kubeClient,
+		machine: machineClient,
+		route:   routeClient,
+		image:   imageClient,
+		ray:     rayClient,
+		dynamic: dynamicClient,
+>>>>>>> 5fce708 (Upgrade from AppWrapper v1beta1 to v1beta2)
 	}, nil
 }

@@ -5,6 +5,8 @@ import (
 
 	fakeray "github.com/ray-project/kuberay/ray-operator/pkg/client/clientset/versioned/fake"
 
+	"k8s.io/apimachinery/pkg/runtime"
+	fakeDynamic "k8s.io/client-go/dynamic/fake"
 	fakeCore "k8s.io/client-go/kubernetes/fake"
 
 	fakeimage "github.com/openshift/client-go/image/clientset/versioned/fake"
@@ -18,6 +20,7 @@ func NewTest(t *testing.T) *T {
 	fakeimageClient := fakeimage.NewSimpleClientset()
 	fakerouteClient := fakeroute.NewSimpleClientset()
 	fakerayClient := fakeray.NewSimpleClientset()
+	fakedynamicClient := fakeDynamic.NewSimpleDynamicClient(runtime.NewScheme())
 
 	test := With(t).(*T)
 	test.client = &testClient{
@@ -26,6 +29,7 @@ func NewTest(t *testing.T) *T {
 		image:   fakeimageClient,
 		route:   fakerouteClient,
 		ray:     fakerayClient,
+		dynamic: fakedynamicClient,
 	}
 	return test
 }
