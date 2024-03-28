@@ -44,13 +44,13 @@ type Client interface {
 }
 
 type testClient struct {
-	core    kubernetes.Interface
+	core     kubernetes.Interface
 	kubeflow kubeflowclient.Interface
-	machine machinev1.Interface
-	route   routev1.Interface
-	image   imagev1.Interface
-	ray     rayclient.Interface
-	dynamic dynamic.Interface
+	machine  machinev1.Interface
+	route    routev1.Interface
+	image    imagev1.Interface
+	ray      rayclient.Interface
+	dynamic  dynamic.Interface
 }
 
 var _ Client = (*testClient)(nil)
@@ -131,22 +131,12 @@ func newTestClient(cfg *rest.Config) (Client, error) {
 	}
 
 	return &testClient{
-<<<<<<< HEAD
 		core:     kubeClient,
 		kubeflow: kubeflowClient,
 		machine:  machineClient,
 		route:    routeClient,
 		image:    imageClient,
-		mcad:     mcadClient,
 		ray:      rayClient,
 		dynamic:  dynamicClient,
-=======
-		core:    kubeClient,
-		machine: machineClient,
-		route:   routeClient,
-		image:   imageClient,
-		ray:     rayClient,
-		dynamic: dynamicClient,
->>>>>>> 5fce708 (Upgrade from AppWrapper v1beta1 to v1beta2)
 	}, nil
 }
