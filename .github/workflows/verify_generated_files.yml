@@ -22,6 +22,6 @@ jobs:
     - name: Set Go
       uses: actions/setup-go@v5
       with:
-        go-version: v1.21
+        go-version-file: './go.mod'
     - name: Verify that imports are organized
       run: make verify-imports
