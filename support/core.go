@@ -151,7 +151,7 @@ func CreatePersistentVolumeClaim(t Test, namespace string, storageSize string, a
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: accessMode,
-			Resources: corev1.ResourceRequirements{
+			Resources: corev1.VolumeResourceRequirements{
 				Requests: corev1.ResourceList{
 					corev1.ResourceStorage: resource.MustParse(storageSize),
 				},
