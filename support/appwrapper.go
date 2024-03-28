@@ -20,15 +20,16 @@ import (
 	"github.com/onsi/gomega"
 	mcadv1beta2 "github.com/project-codeflare/appwrapper/api/v1beta2"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 var appWrapperResource = mcadv1beta2.GroupVersion.WithResource("appwrappers")
 
-func AppWrapper(t Test, namespace string, name string) func(g gomega.Gomega) *mcadv1beta2.AppWrapper {
+func AppWrapper(t Test, namespace *corev1.Namespace, name string) func(g gomega.Gomega) *mcadv1beta2.AppWrapper {
 	return func(g gomega.Gomega) *mcadv1beta2.AppWrapper {
-		unstruct, err := t.Client().Dynamic().Resource(appWrapperResource).Namespace(namespace).Get(t.Ctx(), name, metav1.GetOptions{})
+		unstruct, err := t.Client().Dynamic().Resource(appWrapperResource).Namespace(namespace.Name).Get(t.Ctx(), name, metav1.GetOptions{})
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 		aw := &mcadv1beta2.AppWrapper{}
 		err = runtime.DefaultUnstructuredConverter.FromUnstructured(unstruct.UnstructuredContent(), aw)
@@ -37,14 +38,14 @@ func AppWrapper(t Test, namespace string, name string) func(g gomega.Gomega) *mc
 	}
 }
 
-func GetAppWrapper(t Test, namespace string, name string) *mcadv1beta2.AppWrapper {
+func GetAppWrapper(t Test, namespace *corev1.Namespace, name string) *mcadv1beta2.AppWrapper {
 	t.T().Helper()
 	return AppWrapper(t, namespace, name)(t)
 }
 
-func AppWrappers(t Test, namespace string) func(g gomega.Gomega) []*mcadv1beta2.AppWrapper {
+func AppWrappers(t Test, namespace *corev1.Namespace) func(g gomega.Gomega) []*mcadv1beta2.AppWrapper {
 	return func(g gomega.Gomega) []*mcadv1beta2.AppWrapper {
-		aws, err := t.Client().Dynamic().Resource(appWrapperResource).Namespace(namespace).List(t.Ctx(), metav1.ListOptions{})
+		aws, err := t.Client().Dynamic().Resource(appWrapperResource).Namespace(namespace.Name).List(t.Ctx(), metav1.ListOptions{})
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 
 		awsp := []*mcadv1beta2.AppWrapper{}
