@@ -17,6 +17,7 @@ limitations under the License.
 package support
 
 import (
+	kubeflowclient "github.com/kubeflow/training-operator/pkg/client/clientset/versioned"
 	mcadclient "github.com/project-codeflare/multi-cluster-app-dispatcher/pkg/client/clientset/versioned"
 	rayclient "github.com/ray-project/kuberay/ray-operator/pkg/client/clientset/versioned"
 
@@ -35,6 +36,7 @@ import (
 
 type Client interface {
 	Core() kubernetes.Interface
+	Kubeflow() kubeflowclient.Interface
 	Machine() machinev1.Interface
 	Route() routev1.Interface
 	Image() imagev1.Interface
@@ -44,19 +46,24 @@ type Client interface {
 }
 
 type testClient struct {
-	core    kubernetes.Interface
-	machine machinev1.Interface
-	route   routev1.Interface
-	image   imagev1.Interface
-	mcad    mcadclient.Interface
-	ray     rayclient.Interface
-	dynamic dynamic.Interface
+	core     kubernetes.Interface
+	kubeflow kubeflowclient.Interface
+	machine  machinev1.Interface
+	route    routev1.Interface
+	image    imagev1.Interface
+	mcad     mcadclient.Interface
+	ray      rayclient.Interface
+	dynamic  dynamic.Interface
 }
 
 var _ Client = (*testClient)(nil)
 
 func (t *testClient) Core() kubernetes.Interface {
 	return t.core
+}
+
+func (t *testClient) Kubeflow() kubeflowclient.Interface {
+	return t.kubeflow
 }
 
 func (t *testClient) Machine() machinev1.Interface {
@@ -99,6 +106,11 @@ func newTestClient(cfg *rest.Config) (Client, error) {
 		return nil, err
 	}
 
+	kubeflowClient, err := kubeflowclient.NewForConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	machineClient, err := machinev1.NewForConfig(cfg)
 	if err != nil {
 		return nil, err
@@ -130,12 +142,13 @@ func newTestClient(cfg *rest.Config) (Client, error) {
 	}
 
 	return &testClient{
-		core:    kubeClient,
-		machine: machineClient,
-		route:   routeClient,
-		image:   imageClient,
-		mcad:    mcadClient,
-		ray:     rayClient,
-		dynamic: dynamicClient,
+		core:     kubeClient,
+		kubeflow: kubeflowClient,
+		machine:  machineClient,
+		route:    routeClient,
+		image:    imageClient,
+		mcad:     mcadClient,
+		ray:      rayClient,
+		dynamic:  dynamicClient,
 	}, nil
 }
