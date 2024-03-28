@@ -8,7 +8,7 @@ require (
 	github.com/openshift-online/ocm-sdk-go v0.1.368
 	github.com/openshift/api v0.0.0-20230213134911-7ba313770556
 	github.com/openshift/client-go v0.0.0-20221019143426-16aed247da5c
-	github.com/project-codeflare/appwrapper v0.6.4
+	github.com/project-codeflare/appwrapper v0.7.0
 	github.com/ray-project/kuberay/ray-operator v0.0.0-20231016183545-097828931d15
 	k8s.io/api v0.29.1
 	k8s.io/apimachinery v0.29.1
