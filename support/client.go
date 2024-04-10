@@ -25,6 +25,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	kueueclient "sigs.k8s.io/kueue/client-go/clientset/versioned"
 
 	imagev1 "github.com/openshift/client-go/image/clientset/versioned"
 	machinev1 "github.com/openshift/client-go/machine/clientset/versioned"
@@ -36,6 +37,7 @@ import (
 type Client interface {
 	Core() kubernetes.Interface
 	Kubeflow() kubeflowclient.Interface
+	Kueue() kueueclient.Interface
 	Machine() machinev1.Interface
 	Route() routev1.Interface
 	Image() imagev1.Interface
@@ -46,6 +48,7 @@ type Client interface {
 type testClient struct {
 	core     kubernetes.Interface
 	kubeflow kubeflowclient.Interface
+	kueue    kueueclient.Interface
 	machine  machinev1.Interface
 	route    routev1.Interface
 	image    imagev1.Interface
@@ -61,6 +64,10 @@ func (t *testClient) Core() kubernetes.Interface {
 
 func (t *testClient) Kubeflow() kubeflowclient.Interface {
 	return t.kubeflow
+}
+
+func (t *testClient) Kueue() kueueclient.Interface {
+	return t.kueue
 }
 
 func (t *testClient) Machine() machinev1.Interface {
@@ -105,6 +112,11 @@ func newTestClient(cfg *rest.Config) (Client, error) {
 		return nil, err
 	}
 
+	kueueClient, err := kueueclient.NewForConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	machineClient, err := machinev1.NewForConfig(cfg)
 	if err != nil {
 		return nil, err
@@ -133,6 +145,7 @@ func newTestClient(cfg *rest.Config) (Client, error) {
 	return &testClient{
 		core:     kubeClient,
 		kubeflow: kubeflowClient,
+		kueue:    kueueClient,
 		machine:  machineClient,
 		route:    routeClient,
 		image:    imageClient,
