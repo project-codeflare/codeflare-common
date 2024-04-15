@@ -59,3 +59,27 @@ func TestCreateKueueLocalQueue(t *testing.T) {
 	test.Expect(lq.Namespace).To(gomega.Equal("ns-1"))
 	test.Expect(lq.Spec.ClusterQueue).To(gomega.Equal(kueuev1beta1.ClusterQueueReference("cq-1")))
 }
+
+func TestGetKueueWorkloads(t *testing.T) {
+	test := NewTest(t)
+
+	wl := &kueuev1beta1.Workload{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: kueuev1beta1.SchemeGroupVersion.String(),
+			Kind:       "Workload",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "wl1",
+		},
+	}
+
+	_, err := test.Client().Kueue().KueueV1beta1().Workloads("ns-1").Create(test.ctx, wl, metav1.CreateOptions{})
+	test.Expect(err).To(gomega.BeNil())
+
+	wls := GetKueueWorkloads(test, "ns-1")
+
+	test.Expect(wls).To(gomega.Not(gomega.BeNil()))
+	test.Expect(wls).To(gomega.HaveLen(1))
+	test.Expect(wls[0].Name).To(gomega.Equal("wl1"))
+	test.Expect(wls[0].Namespace).To(gomega.Equal("ns-1"))
+}
