@@ -67,9 +67,22 @@ runs:
         kubectl annotate ingressclass nginx "ingressclass.kubernetes.io/is-default-class=true"
         kubectl -n ingress-nginx wait --timeout=300s --for=condition=Available deployments --all
 
-    - name: Add ${{ inputs.node-hostname }} host to machine hosts
+    - name: Setup Dnsmasq to resolve hostnames with domain name ${{ inputs.node-hostname }}
       shell: bash
-      run: echo "127.0.0.1 ${{ inputs.node-hostname }}" | sudo tee -a /etc/hosts
+      run: |
+        # Based on https://sixfeetup.com/blog/local-development-with-wildcard-dns-on-linux
+        sudo apt-get install dnsmasq
+
+        sudo sed -i -E "s/#DNS=/DNS=127.0.0.2/" /etc/systemd/resolved.conf
+        sudo sed -i -E "s/#Domains=/Domains=~${{ inputs.node-hostname }}/" /etc/systemd/resolved.conf
+        sudo systemctl restart systemd-resolved
+
+        sudo sed -i -E "s/#IGNORE_RESOLVCONF=yes/IGNORE_RESOLVCONF=yes/" /etc/default/dnsmasq
+        sudo sed -i -E "s/#listen-address=/listen-address=127.0.0.2/" /etc/dnsmasq.conf
+        sudo sed -i -E "s/#bind-interfaces/bind-interfaces/" /etc/dnsmasq.conf
+        sudo sed -i -E "s|#(address=).*|\1/${{ inputs.node-hostname }}/127.0.0.1|" /etc/dnsmasq.conf
+        sudo systemctl restart dnsmasq
+        systemctl status dnsmasq
 
     - name: Set env variables for tests to properly leverage KinD cluster
       shell: bash
