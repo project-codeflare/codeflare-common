@@ -65,6 +65,25 @@ func GetRayCluster(t Test, namespace, name string) *rayv1.RayCluster {
 	return RayCluster(t, namespace, name)(t)
 }
 
+func RayClusters(t Test, namespace string) func(g gomega.Gomega) []*rayv1.RayCluster {
+	return func(g gomega.Gomega) []*rayv1.RayCluster {
+		rcs, err := t.Client().Ray().RayV1().RayClusters(namespace).List(t.Ctx(), metav1.ListOptions{})
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+
+		rcsp := []*rayv1.RayCluster{}
+		for _, v := range rcs.Items {
+			rcsp = append(rcsp, &v)
+		}
+
+		return rcsp
+	}
+}
+
+func GetRayClusters(t Test, namespace string) []*rayv1.RayCluster {
+	t.T().Helper()
+	return RayClusters(t, namespace)(t)
+}
+
 func RayClusterState(cluster *rayv1.RayCluster) rayv1.ClusterState {
 	return cluster.Status.State
 }

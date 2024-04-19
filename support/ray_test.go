@@ -44,3 +44,22 @@ func TestGetRayCluster(t *testing.T) {
 	test.Expect(raycluster.Name).To(gomega.Equal("my-cluster-1"))
 	test.Expect(raycluster.Namespace).To(gomega.Equal("my-namespace"))
 }
+
+func TestGetRayClusters(t *testing.T) {
+
+	test := NewTest(t)
+
+	RayCluster := &rayv1alpha1.RayCluster{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-cluster-1",
+			Namespace: "my-namespace",
+		},
+	}
+
+	test.client.Ray().RayV1().RayClusters("my-namespace").Create(test.ctx, RayCluster, metav1.CreateOptions{})
+	rayclusters := GetRayClusters(test, "my-namespace")
+
+	test.Expect(len(rayclusters)).To(gomega.Equal(1))
+	test.Expect(rayclusters[0].Name).To(gomega.Equal("my-cluster-1"))
+	test.Expect(rayclusters[0].Namespace).To(gomega.Equal("my-namespace"))
+}
