@@ -8,12 +8,12 @@ require (
 	github.com/openshift-online/ocm-sdk-go v0.1.368
 	github.com/openshift/api v0.0.0-20230213134911-7ba313770556
 	github.com/openshift/client-go v0.0.0-20221019143426-16aed247da5c
-	github.com/project-codeflare/appwrapper v0.7.0
+	github.com/project-codeflare/appwrapper v0.8.0
 	github.com/ray-project/kuberay/ray-operator v1.1.0-alpha.0
-	k8s.io/api v0.29.1
-	k8s.io/apimachinery v0.29.1
-	k8s.io/client-go v0.29.1
-	sigs.k8s.io/kueue v0.6.1
+	k8s.io/api v0.29.2
+	k8s.io/apimachinery v0.29.2
+	k8s.io/client-go v0.29.2
+	sigs.k8s.io/kueue v0.6.2
 )
 
 require (
