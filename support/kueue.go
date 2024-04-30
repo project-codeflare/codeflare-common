@@ -89,18 +89,23 @@ func CreateKueueLocalQueue(t Test, namespace, clusterQueueName string) *kueuev1b
 	return localQueue
 }
 
+func KueueWorkloads(t Test, namespace string) func(g gomega.Gomega) []*kueuev1beta1.Workload {
+	return func(g gomega.Gomega) []*kueuev1beta1.Workload {
+		workloads, err := t.Client().Kueue().KueueV1beta1().Workloads(namespace).List(t.Ctx(), metav1.ListOptions{})
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+
+		workloadsp := []*kueuev1beta1.Workload{}
+		for _, v := range workloads.Items {
+			workloadsp = append(workloadsp, &v)
+		}
+
+		return workloadsp
+	}
+}
+
 func GetKueueWorkloads(t Test, namespace string) []*kueuev1beta1.Workload {
 	t.T().Helper()
-
-	workloads, err := t.Client().Kueue().KueueV1beta1().Workloads(namespace).List(t.Ctx(), metav1.ListOptions{})
-	t.Expect(err).NotTo(gomega.HaveOccurred())
-
-	workloadsp := []*kueuev1beta1.Workload{}
-	for _, v := range workloads.Items {
-		workloadsp = append(workloadsp, &v)
-	}
-
-	return workloadsp
+	return KueueWorkloads(t, namespace)(t)
 }
 
 func KueueWorkloadAdmitted(workload *kueuev1beta1.Workload) bool {
