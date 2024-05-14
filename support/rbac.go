@@ -101,7 +101,7 @@ func CreateRoleBinding(t Test, namespace string, serviceAccount *corev1.ServiceA
 	return rb
 }
 
-func CreateUserRoleBinding(t Test, namespace string, userName string, role *rbacv1.Role) *rbacv1.RoleBinding {
+func CreateUserRoleBinding(t Test, namespace string, userName string, roleName string) *rbacv1.RoleBinding {
 	t.T().Helper()
 
 	roleBinding := &rbacv1.RoleBinding{
@@ -115,7 +115,7 @@ func CreateUserRoleBinding(t Test, namespace string, userName string, role *rbac
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.SchemeGroupVersion.Group,
 			Kind:     "Role",
-			Name:     role.Name,
+			Name:     roleName,
 		},
 		Subjects: []rbacv1.Subject{
 			{
@@ -127,7 +127,7 @@ func CreateUserRoleBinding(t Test, namespace string, userName string, role *rbac
 	}
 	rb, err := t.Client().Core().RbacV1().RoleBindings(namespace).Create(t.Ctx(), roleBinding, metav1.CreateOptions{})
 	t.Expect(err).NotTo(gomega.HaveOccurred())
-	t.T().Logf("Created User RoleBinding %s/%s successfully", role.Namespace, role.Name)
+	t.T().Logf("Created User RoleBinding %s/%s successfully", roleBinding.Namespace, roleBinding.Name)
 
 	return rb
 }
@@ -168,7 +168,7 @@ func CreateClusterRoleBinding(t Test, serviceAccount *corev1.ServiceAccount, rol
 	return rb
 }
 
-func CreateUserClusterRoleBinding(t Test, userName string, role *rbacv1.ClusterRole) *rbacv1.ClusterRoleBinding {
+func CreateUserClusterRoleBinding(t Test, userName string, roleName string) *rbacv1.ClusterRoleBinding {
 	t.T().Helper()
 
 	roleBinding := &rbacv1.ClusterRoleBinding{
@@ -182,7 +182,7 @@ func CreateUserClusterRoleBinding(t Test, userName string, role *rbacv1.ClusterR
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: rbacv1.SchemeGroupVersion.Group,
 			Kind:     "ClusterRole",
-			Name:     role.Name,
+			Name:     roleName,
 		},
 		Subjects: []rbacv1.Subject{
 			{
@@ -194,7 +194,7 @@ func CreateUserClusterRoleBinding(t Test, userName string, role *rbacv1.ClusterR
 	}
 	rb, err := t.Client().Core().RbacV1().ClusterRoleBindings().Create(t.Ctx(), roleBinding, metav1.CreateOptions{})
 	t.Expect(err).NotTo(gomega.HaveOccurred())
-	t.T().Logf("Created User ClusterRoleBinding %s/%s successfully", role.Namespace, role.Name)
+	t.T().Logf("Created User ClusterRoleBinding %s successfully", roleBinding.Name)
 
 	t.T().Cleanup(func() {
 		t.Client().Core().RbacV1().ClusterRoleBindings().Delete(t.Ctx(), rb.Name, metav1.DeleteOptions{})
