@@ -22,25 +22,13 @@ import (
 	"github.com/onsi/gomega"
 
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestCreateUserRoleBinding(t *testing.T) {
 
 	test := NewTest(t)
 
-	role := &rbacv1.Role{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: rbacv1.SchemeGroupVersion.String(),
-			Kind:       "Role",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "role1",
-			Namespace: "ns-1",
-		},
-	}
-
-	rb := CreateUserRoleBinding(test, "ns-1", "user-1", role)
+	rb := CreateUserRoleBinding(test, "ns-1", "user-1", "role1")
 
 	test.Expect(rb).To(gomega.Not(gomega.BeNil()))
 	test.Expect(rb.GenerateName).To(gomega.Equal("rb-"))
@@ -59,17 +47,7 @@ func TestCreateUserClusterRoleBinding(t *testing.T) {
 
 	test := NewTest(t)
 
-	crole := &rbacv1.ClusterRole{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: rbacv1.SchemeGroupVersion.String(),
-			Kind:       "ClusterRole",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "role1",
-		},
-	}
-
-	rb := CreateUserClusterRoleBinding(test, "user-1", crole)
+	rb := CreateUserClusterRoleBinding(test, "user-1", "role1")
 
 	test.Expect(rb).To(gomega.Not(gomega.BeNil()))
 	test.Expect(rb.GenerateName).To(gomega.Equal("crb-"))
