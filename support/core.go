@@ -184,3 +184,33 @@ func GetNodeInternalIP(t Test, node corev1.Node) (IP string) {
 
 	return
 }
+
+func GetContainerName(t Test, container corev1.Container) string {
+	t.T().Helper()
+	t.Expect(container.Name).Should(gomega.Not(gomega.BeEmpty()))
+	return container.Name
+}
+
+func GetVolumeName(t Test, volume corev1.Volume) string {
+	t.T().Helper()
+	t.Expect(volume.Name).Should(gomega.Not(gomega.BeEmpty()))
+	return volume.Name
+}
+
+func GetServiceAccountName(t Test, serviceAccount corev1.ServiceAccount) string {
+	t.T().Helper()
+	t.Expect(serviceAccount.Name).Should(gomega.Not(gomega.BeEmpty()))
+	return serviceAccount.Name
+}
+
+func GetVolumeMountName(t Test, volumeMount corev1.VolumeMount) string {
+	t.T().Helper()
+	t.Expect(volumeMount.Name).Should(gomega.Not(gomega.BeEmpty()))
+	return volumeMount.Name
+}
+
+func GetEnvVarName(t Test, envVar corev1.EnvVar) string {
+	t.T().Helper()
+	t.Expect(envVar.Name).Should(gomega.Not(gomega.BeEmpty()))
+	return envVar.Name
+}
