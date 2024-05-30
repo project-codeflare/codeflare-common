@@ -60,3 +60,22 @@ func TestCreateUserClusterRoleBinding(t *testing.T) {
 	test.Expect(rb.Subjects[0].Kind).To(gomega.Equal("User"))
 	test.Expect(rb.Subjects[0].Name).To(gomega.Equal("user-1"))
 }
+
+func TestCreateUserRoleBindingWithClusterRole(t *testing.T) {
+
+	test := NewTest(t)
+	namespace := test.NewTestNamespace()
+
+	rb := CreateUserRoleBindingWithClusterRole(test, "user-1", namespace.Name, "role1")
+
+	test.Expect(rb).To(gomega.Not(gomega.BeNil()))
+	test.Expect(rb.GenerateName).To(gomega.Equal("rb-"))
+
+	test.Expect(rb.RoleRef.APIGroup).To(gomega.Equal(rbacv1.SchemeGroupVersion.Group))
+	test.Expect(rb.RoleRef.Kind).To(gomega.Equal("ClusterRole"))
+	test.Expect(rb.RoleRef.Name).To(gomega.Equal("role1"))
+
+	test.Expect(rb.Subjects[0].APIGroup).To(gomega.Equal(rbacv1.SchemeGroupVersion.Group))
+	test.Expect(rb.Subjects[0].Kind).To(gomega.Equal("User"))
+	test.Expect(rb.Subjects[0].Name).To(gomega.Equal("user-1"))
+}
