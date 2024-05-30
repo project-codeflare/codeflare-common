@@ -202,3 +202,37 @@ func CreateUserClusterRoleBinding(t Test, userName string, roleName string) *rba
 
 	return rb
 }
+
+func CreateUserRoleBindingWithClusterRole(t Test, userName string, namespace string, roleName string) *rbacv1.RoleBinding {
+	t.T().Helper()
+
+	// Create a RoleBinding to give specified role access to the user for given namespace
+	roleBinding := &rbacv1.RoleBinding{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: rbacv1.SchemeGroupVersion.String(),
+			Kind:       "RoleBinding",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: "rb-",
+			Namespace:    namespace,
+		},
+		RoleRef: rbacv1.RoleRef{
+			Kind:     "ClusterRole",
+			Name:     roleName, // grants specified role access
+			APIGroup: rbacv1.SchemeGroupVersion.Group,
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:     "User",
+				Name:     userName,
+				APIGroup: rbacv1.SchemeGroupVersion.Group,
+			},
+		},
+	}
+
+	rb, err := t.Client().Core().RbacV1().RoleBindings(namespace).Create(t.Ctx(), roleBinding, metav1.CreateOptions{})
+	t.Expect(err).NotTo(gomega.HaveOccurred())
+	t.T().Logf("Created User RoleBinding %s in namespace %s successfully", roleBinding.Name, roleBinding.Namespace)
+
+	return rb
+}
