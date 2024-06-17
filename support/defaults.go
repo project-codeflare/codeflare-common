@@ -7,5 +7,5 @@ package support
 const (
 	CodeFlareSDKVersion = "0.12.0"
 	RayVersion          = "2.5.0"
-	RayImage            = "quay.io/project-codeflare/ray:latest-py39-cu118"
+	RayImage            = "quay.io/project-codeflare/ray:2.20.0-py39-cu118"
 )
