@@ -33,6 +33,7 @@ type Test interface {
 	T() *testing.T
 	Ctx() context.Context
 	Client() Client
+	Config() *rest.Config
 	OutputDir() string
 
 	gomega.Gomega
@@ -102,14 +103,22 @@ func (t *T) Client() Client {
 	t.T().Helper()
 	t.once.client.Do(func() {
 		if t.client == nil {
-			c, err := newTestClient(t.cfg)
+			c, cfg, err := newTestClient(t.cfg)
 			if err != nil {
 				t.T().Fatalf("Error creating client: %v", err)
 			}
 			t.client = c
+			t.cfg = cfg
 		}
 	})
 	return t.client
+}
+
+func (t *T) Config() *rest.Config {
+	t.T().Helper()
+	// Invoke Client() function to initialize client
+	t.Client()
+	return t.cfg
 }
 
 func (t *T) OutputDir() string {

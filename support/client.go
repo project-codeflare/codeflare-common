@@ -90,7 +90,7 @@ func (t *testClient) Dynamic() dynamic.Interface {
 	return t.dynamic
 }
 
-func newTestClient(cfg *rest.Config) (Client, error) {
+func newTestClient(cfg *rest.Config) (Client, *rest.Config, error) {
 	var err error
 	if cfg == nil {
 		cfg, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -98,48 +98,48 @@ func newTestClient(cfg *rest.Config) (Client, error) {
 			&clientcmd.ConfigOverrides{},
 		).ClientConfig()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
 	kubeClient, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	kubeflowClient, err := kubeflowclient.NewForConfig(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	kueueClient, err := kueueclient.NewForConfig(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	machineClient, err := machinev1.NewForConfig(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	routeClient, err := routev1.NewForConfig(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	imageClient, err := imagev1.NewForConfig(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	rayClient, err := rayclient.NewForConfig(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	dynamicClient, err := dynamic.NewForConfig(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	return &testClient{
@@ -151,5 +151,5 @@ func newTestClient(cfg *rest.Config) (Client, error) {
 		image:    imageClient,
 		ray:      rayClient,
 		dynamic:  dynamicClient,
-	}, nil
+	}, cfg, nil
 }
