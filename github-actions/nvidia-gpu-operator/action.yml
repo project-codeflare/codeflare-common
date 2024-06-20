@@ -1,0 +1,25 @@
+name: "Install NVidia GPU operator for KinD"
+description: "Step to install NVidia GPU operator for KinD, based on https://www.substratus.ai/blog/kind-with-gpus"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Helm
+      run: |
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+        sudo chmod 777 /usr/local/bin/helm
+      shell: bash
+
+    - name: Install NVidia GPU operator
+      run: |
+        helm repo add nvidia https://helm.ngc.nvidia.com/nvidia || true
+        helm repo update
+        helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator --set driver.enabled=false
+      shell: bash
+
+    - name: Print KinD node
+      run: |
+        kubectl describe nodes
+      shell: bash
