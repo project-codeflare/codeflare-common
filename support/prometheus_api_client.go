@@ -36,6 +36,7 @@ func GetOpenShiftPrometheusApiClient(t Test) prometheusapiv1.API {
 		// Functionality intended just for testing purpose, DO NOT USE IN PRODUCTION
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			Proxy:           http.ProxyFromEnvironment,
 		}
 		client, err := prometheusapi.NewClient(prometheusapi.Config{
 			Address: "https://" + prometheusOpenShiftRoute.Status.Ingress[0].Host,
