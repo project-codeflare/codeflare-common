@@ -1,6 +1,16 @@
 name: "Install NVidia GPU operator for KinD"
 description: "Step to install NVidia GPU operator for KinD, based on https://www.substratus.ai/blog/kind-with-gpus"
 
+inputs:
+  enable-time-slicing:
+    description: "Enable time slicing for NVidia GPU operator"
+    required: false
+    default: 'false'
+  time-slicing-capacity:
+    description: "Time slicing GPU multiplier"
+    required: false
+    default: 4
+
 runs:
   using: "composite"
   steps:
@@ -22,4 +32,13 @@ runs:
     - name: Print KinD node
       run: |
         kubectl describe nodes
+      shell: bash
+
+    - name: Configuring Time-Slicing for NVidia GPU operator
+      if: inputs.enable-time-slicing == 'true'
+      run: |
+        sudo sed -i "s/<REPLICAS>/${{ inputs.time-slicing-capacity }}/" ${GITHUB_ACTION_PATH}/resources/time-slicing-config.yaml
+        kubectl create -n gpu-operator -f ${GITHUB_ACTION_PATH}/resources/time-slicing-config.yaml
+        kubectl patch clusterpolicies.nvidia.com/cluster-policy -n gpu-operator --type merge -p '{"spec": {"devicePlugin": {"config": {"name": "time-slicing-config", "default": "any"}}}}'
+        kubectl wait --timeout=120s --for=jsonpath='{.status.capacity.nvidia\.com/gpu}'=${{ inputs.time-slicing-capacity }} node/cluster-control-plane
       shell: bash
