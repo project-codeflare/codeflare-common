@@ -13,6 +13,12 @@ runs:
         cp -r /etc/containers ~/.config/containers
       shell: bash
 
+    - name: Install yq
+      run: |
+        sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+        sudo chmod 777 /usr/local/bin/yq
+      shell: bash
+
     - name: Setup NVIDIA Container Toolkit
       run: |
         sudo nvidia-ctk runtime configure --runtime=docker --set-as-default
