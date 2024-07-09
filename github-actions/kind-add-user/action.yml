@@ -33,10 +33,10 @@ runs:
         cat $HOME/.kube/config
 
         # Cleanup
-        rm ca.crt
-        rm ca.srl
-        rm ca.key
-        rm user.crt
-        rm user.key
-        rm user.csr
+        rm --force ca.crt
+        rm --force ca.srl
+        rm --force ca.key
+        rm --force user.crt
+        rm --force user.key
+        rm --force user.csr
       shell: bash
