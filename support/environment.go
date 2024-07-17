@@ -51,6 +51,13 @@ const (
 	// URL for PiPI index containing all the required test Python packages
 	pipIndexURL    = "PIP_INDEX_URL"
 	pipTrustedHost = "PIP_TRUSTED_HOST"
+
+	// Storage bucket credentials
+	storageDefaultEndpoint = "AWS_DEFAULT_ENDPOINT"
+	storageAccessKeyId     = "AWS_ACCESS_KEY_ID"
+	storageSecretKey       = "AWS_SECRET_ACCESS_KEY"
+	storageBucketName      = "AWS_STORAGE_BUCKET"
+	storageBucketMnistDir  = "AWS_STORAGE_BUCKET_MNIST_DIR"
 )
 
 type ClusterType string
@@ -118,7 +125,32 @@ func GetClusterHostname(t Test) string {
 }
 
 func GetMnistDatasetURL() string {
-	return lookupEnvOrDefault(mnistDatasetURL, "http://yann.lecun.com/exdb/mnist/")
+	return lookupEnvOrDefault(mnistDatasetURL, "https://ossci-datasets.s3.amazonaws.com/mnist/")
+}
+
+func GetStorageBucketDefaultEndpoint() (string, bool) {
+	storage_endpoint, exists := os.LookupEnv(storageDefaultEndpoint)
+	return storage_endpoint, exists
+}
+
+func GetStorageBucketAccessKeyId() (string, bool) {
+	storage_access_key_id, exists := os.LookupEnv(storageAccessKeyId)
+	return storage_access_key_id, exists
+}
+
+func GetStorageBucketSecretKey() (string, bool) {
+	storage_secret_key, exists := os.LookupEnv(storageSecretKey)
+	return storage_secret_key, exists
+}
+
+func GetStorageBucketName() (string, bool) {
+	storage_bucket_name, exists := os.LookupEnv(storageBucketName)
+	return storage_bucket_name, exists
+}
+
+func GetStorageBucketMnistDir() (string, bool) {
+	storage_bucket_mnist_dir, exists := os.LookupEnv(storageBucketMnistDir)
+	return storage_bucket_mnist_dir, exists
 }
 
 func GetPipIndexURL() string {
