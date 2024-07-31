@@ -54,6 +54,7 @@ const (
 
 	// Storage bucket credentials
 	storageDefaultEndpoint = "AWS_DEFAULT_ENDPOINT"
+	storageDefaultRegion   = "AWS_DEFAULT_REGION"
 	storageAccessKeyId     = "AWS_ACCESS_KEY_ID"
 	storageSecretKey       = "AWS_SECRET_ACCESS_KEY"
 	storageBucketName      = "AWS_STORAGE_BUCKET"
@@ -131,6 +132,11 @@ func GetMnistDatasetURL() string {
 func GetStorageBucketDefaultEndpoint() (string, bool) {
 	storage_endpoint, exists := os.LookupEnv(storageDefaultEndpoint)
 	return storage_endpoint, exists
+}
+
+func GetStorageBucketDefaultRegion() (string, bool) {
+	storage_default_region, exists := os.LookupEnv(storageDefaultRegion)
+	return storage_default_region, exists
 }
 
 func GetStorageBucketAccessKeyId() (string, bool) {

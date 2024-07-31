@@ -65,7 +65,20 @@ func CreateKueueClusterQueue(t Test, clusterQueueSpec kueuev1beta1.ClusterQueueS
 	return clusterQueue
 }
 
-func CreateKueueLocalQueue(t Test, namespace, clusterQueueName string) *kueuev1beta1.LocalQueue {
+var AsDefaultQueue = defaultLocalQueueOption{}
+
+type defaultLocalQueueOption struct {
+}
+
+func (d defaultLocalQueueOption) applyTo(to *kueuev1beta1.LocalQueue) error {
+	if to.Annotations == nil {
+		to.Annotations = make(map[string]string)
+	}
+	to.Annotations["kueue.x-k8s.io/default-queue"] = "true"
+	return nil
+}
+
+func CreateKueueLocalQueue(t Test, namespace string, clusterQueueName string, options ...Option[*kueuev1beta1.LocalQueue]) *kueuev1beta1.LocalQueue {
 	t.T().Helper()
 
 	localQueue := &kueuev1beta1.LocalQueue{
@@ -82,7 +95,12 @@ func CreateKueueLocalQueue(t Test, namespace, clusterQueueName string) *kueuev1b
 		},
 	}
 
-	localQueue, err := t.Client().Kueue().KueueV1beta1().LocalQueues(namespace).Create(t.Ctx(), localQueue, metav1.CreateOptions{})
+	//Apply options
+	for _, opt := range options {
+		t.Expect(opt.applyTo(localQueue)).To(gomega.Succeed())
+	}
+
+	localQueue, err := t.Client().Kueue().KueueV1beta1().LocalQueues(localQueue.Namespace).Create(t.Ctx(), localQueue, metav1.CreateOptions{})
 	t.Expect(err).NotTo(gomega.HaveOccurred())
 	t.T().Logf("Created Kueue LocalQueue %s/%s successfully", localQueue.Namespace, localQueue.Name)
 
