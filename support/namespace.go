@@ -17,6 +17,8 @@ limitations under the License.
 package support
 
 import (
+	"fmt"
+
 	"github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
@@ -77,10 +79,9 @@ func CreateTestNamespaceWithName(t Test, namespaceName string, options ...Option
 }
 
 func GetNamespaceWithName(t Test, namespaceName string) *corev1.Namespace {
+	t.T().Helper()
 	namespace, err := t.Client().Core().CoreV1().Namespaces().Get(t.Ctx(), namespaceName, metav1.GetOptions{})
-	if err != nil {
-		t.T().Errorf("Failed to retrieve namespace with name %s: %v", namespaceName, err)
-	}
+	t.Expect(err).NotTo(gomega.HaveOccurred(), fmt.Sprintf("Failed to retrieve namespace with name: %s", namespaceName))
 	return namespace
 }
 
