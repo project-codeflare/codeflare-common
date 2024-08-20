@@ -18,11 +18,13 @@ package support
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type RayJobSetup struct {
@@ -45,20 +47,32 @@ type RayJobLogsResponse struct {
 	Logs string `json:"logs"`
 }
 
+type RayClusterClientConfig struct {
+	SkipTlsVerification bool
+}
+
 var _ RayClusterClient = (*rayClusterClient)(nil)
 
 type rayClusterClient struct {
-	endpoint url.URL
+	endpoint   url.URL
+	httpClient *http.Client
+	authHeader string
 }
 
 type RayClusterClient interface {
 	CreateJob(job *RayJobSetup) (*RayJobResponse, error)
 	GetJobDetails(jobID string) (*RayJobDetailsResponse, error)
 	GetJobLogs(jobID string) (string, error)
+	GetAllJobsData() ([]map[string]interface{}, error)
+	WaitForJobStatus(jobID string) (string, error)
 }
 
-func NewRayClusterClient(dashboardEndpoint url.URL) RayClusterClient {
-	return &rayClusterClient{endpoint: dashboardEndpoint}
+func NewRayClusterClient(dashboardEndpoint url.URL, config RayClusterClientConfig, authHeader string) RayClusterClient {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: config.SkipTlsVerification},
+		Proxy:           http.ProxyFromEnvironment,
+	}
+	return &rayClusterClient{endpoint: dashboardEndpoint, httpClient: &http.Client{Transport: tr}, authHeader: authHeader}
 }
 
 func (client *rayClusterClient) CreateJob(job *RayJobSetup) (response *RayJobResponse, err error) {
@@ -68,7 +82,8 @@ func (client *rayClusterClient) CreateJob(job *RayJobSetup) (response *RayJobRes
 	}
 
 	createJobURL := client.endpoint.String() + "/api/jobs/"
-	resp, err := http.Post(createJobURL, "application/json", bytes.NewReader(marshalled))
+
+	resp, err := client.httpClient.Post(createJobURL, "application/json", bytes.NewReader(marshalled))
 	if err != nil {
 		return
 	}
@@ -86,11 +101,51 @@ func (client *rayClusterClient) CreateJob(job *RayJobSetup) (response *RayJobRes
 	return
 }
 
+func (client *rayClusterClient) GetAllJobsData() ([]map[string]interface{}, error) {
+	getAllJobsDetailsURL := client.endpoint.String() + "/api/jobs/"
+
+	req, err := http.NewRequest(http.MethodGet, getAllJobsDetailsURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	if client.authHeader != "" {
+		req.Header.Set("Authorization", "Bearer "+client.authHeader)
+	}
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == 503 {
+		return nil, fmt.Errorf("service unavailable")
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []map[string]interface{}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (client *rayClusterClient) GetJobDetails(jobID string) (response *RayJobDetailsResponse, err error) {
 	getJobDetailsURL := client.endpoint.String() + "/api/jobs/" + jobID
-	resp, err := http.Get(getJobDetailsURL)
+
+	req, err := http.NewRequest(http.MethodGet, getJobDetailsURL, nil)
 	if err != nil {
-		return
+		return nil, err
+	}
+	if client.authHeader != "" {
+		req.Header.Set("Authorization", "Bearer "+client.authHeader)
+	}
+
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return nil, err
 	}
 
 	respData, err := io.ReadAll(resp.Body)
@@ -108,14 +163,21 @@ func (client *rayClusterClient) GetJobDetails(jobID string) (response *RayJobDet
 
 func (client *rayClusterClient) GetJobLogs(jobID string) (logs string, err error) {
 	getJobLogsURL := client.endpoint.String() + "/api/jobs/" + jobID + "/logs"
-	resp, err := http.Get(getJobLogsURL)
+	req, err := http.NewRequest(http.MethodGet, getJobLogsURL, nil)
 	if err != nil {
-		return
+		return "", err
+	}
+	if client.authHeader != "" {
+		req.Header.Set("Authorization", "Bearer "+client.authHeader)
+	}
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return "", err
 	}
 
 	respData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return
+		return "", err
 	}
 
 	if resp.StatusCode != 200 {
@@ -125,4 +187,34 @@ func (client *rayClusterClient) GetJobLogs(jobID string) (logs string, err error
 	jobLogs := RayJobLogsResponse{}
 	err = json.Unmarshal(respData, &jobLogs)
 	return jobLogs.Logs, err
+}
+
+func (client *rayClusterClient) WaitForJobStatus(jobID string) (string, error) {
+	var status string
+	var prevStatus string
+	fmt.Printf("Waiting for job to be Succeeded...\n")
+	var err error
+	var resp *RayJobDetailsResponse
+	for status != "SUCCEEDED" {
+		resp, err = client.GetJobDetails(jobID)
+		if err != nil {
+			time.Sleep(2 * time.Second)
+			continue
+		}
+		statusVal := resp.Status
+		if statusVal == "SUCCEEDED" || statusVal == "FAILED" {
+			fmt.Printf("JobStatus : %s\n", statusVal)
+			prevStatus = statusVal
+			return prevStatus, err
+		}
+		if prevStatus != statusVal && statusVal != "SUCCEEDED" {
+			fmt.Printf("JobStatus : %s...\n", statusVal)
+			prevStatus = statusVal
+		}
+		time.Sleep(3 * time.Second)
+	}
+	if prevStatus != "SUCCEEDED" {
+		err = fmt.Errorf("Job failed !")
+	}
+	return prevStatus, err
 }
