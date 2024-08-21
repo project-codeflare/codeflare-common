@@ -25,6 +25,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	. "github.com/onsi/gomega"
 )
 
 type RayJobSetup struct {
@@ -54,25 +56,25 @@ type RayClusterClientConfig struct {
 var _ RayClusterClient = (*rayClusterClient)(nil)
 
 type rayClusterClient struct {
-	endpoint   url.URL
-	httpClient *http.Client
-	authHeader string
+	endpoint    url.URL
+	httpClient  *http.Client
+	bearerToken string
 }
 
 type RayClusterClient interface {
 	CreateJob(job *RayJobSetup) (*RayJobResponse, error)
 	GetJobDetails(jobID string) (*RayJobDetailsResponse, error)
 	GetJobLogs(jobID string) (string, error)
-	GetAllJobsData() ([]map[string]interface{}, error)
-	WaitForJobStatus(jobID string) (string, error)
+	GetJobs() ([]map[string]interface{}, error)
+	WaitForJobStatus(test Test, jobID string) string
 }
 
-func NewRayClusterClient(dashboardEndpoint url.URL, config RayClusterClientConfig, authHeader string) RayClusterClient {
+func NewRayClusterClient(dashboardEndpoint url.URL, config RayClusterClientConfig, bearerToken string) RayClusterClient {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: config.SkipTlsVerification},
 		Proxy:           http.ProxyFromEnvironment,
 	}
-	return &rayClusterClient{endpoint: dashboardEndpoint, httpClient: &http.Client{Transport: tr}, authHeader: authHeader}
+	return &rayClusterClient{endpoint: dashboardEndpoint, httpClient: &http.Client{Transport: tr}, bearerToken: bearerToken}
 }
 
 func (client *rayClusterClient) CreateJob(job *RayJobSetup) (response *RayJobResponse, err error) {
@@ -101,15 +103,15 @@ func (client *rayClusterClient) CreateJob(job *RayJobSetup) (response *RayJobRes
 	return
 }
 
-func (client *rayClusterClient) GetAllJobsData() ([]map[string]interface{}, error) {
+func (client *rayClusterClient) GetJobs() ([]map[string]interface{}, error) {
 	getAllJobsDetailsURL := client.endpoint.String() + "/api/jobs/"
 
 	req, err := http.NewRequest(http.MethodGet, getAllJobsDetailsURL, nil)
 	if err != nil {
 		return nil, err
 	}
-	if client.authHeader != "" {
-		req.Header.Set("Authorization", "Bearer "+client.authHeader)
+	if client.bearerToken != "" {
+		req.Header.Set("Authorization", "Bearer "+client.bearerToken)
 	}
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
@@ -139,8 +141,8 @@ func (client *rayClusterClient) GetJobDetails(jobID string) (response *RayJobDet
 	if err != nil {
 		return nil, err
 	}
-	if client.authHeader != "" {
-		req.Header.Set("Authorization", "Bearer "+client.authHeader)
+	if client.bearerToken != "" {
+		req.Header.Set("Authorization", "Bearer "+client.bearerToken)
 	}
 
 	resp, err := client.httpClient.Do(req)
@@ -167,8 +169,8 @@ func (client *rayClusterClient) GetJobLogs(jobID string) (logs string, err error
 	if err != nil {
 		return "", err
 	}
-	if client.authHeader != "" {
-		req.Header.Set("Authorization", "Bearer "+client.authHeader)
+	if client.bearerToken != "" {
+		req.Header.Set("Authorization", "Bearer "+client.bearerToken)
 	}
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
@@ -189,32 +191,30 @@ func (client *rayClusterClient) GetJobLogs(jobID string) (logs string, err error
 	return jobLogs.Logs, err
 }
 
-func (client *rayClusterClient) WaitForJobStatus(jobID string) (string, error) {
+func (client *rayClusterClient) WaitForJobStatus(test Test, jobID string) string {
 	var status string
-	var prevStatus string
 	fmt.Printf("Waiting for job to be Succeeded...\n")
-	var err error
-	var resp *RayJobDetailsResponse
-	for status != "SUCCEEDED" {
-		resp, err = client.GetJobDetails(jobID)
-		if err != nil {
-			time.Sleep(2 * time.Second)
-			continue
-		}
+
+	test.Eventually(func() string {
+		resp, err := client.GetJobDetails(jobID)
+		test.Expect(err).ToNot(HaveOccurred())
 		statusVal := resp.Status
 		if statusVal == "SUCCEEDED" || statusVal == "FAILED" {
 			fmt.Printf("JobStatus : %s\n", statusVal)
-			prevStatus = statusVal
-			return prevStatus, err
+			status = statusVal
+			return status
 		}
-		if prevStatus != statusVal && statusVal != "SUCCEEDED" {
+		if status != statusVal && statusVal != "SUCCEEDED" {
 			fmt.Printf("JobStatus : %s...\n", statusVal)
-			prevStatus = statusVal
+			status = statusVal
 		}
-		time.Sleep(3 * time.Second)
+		return status
+	}, TestTimeoutDouble, 3*time.Second).Should(Or(Equal("SUCCEEDED"), Equal("FAILED")), "Job did not complete within the expected time")
+
+	if status == "SUCCEEDED" {
+		fmt.Printf("Job succeeded !\n")
+	} else {
+		fmt.Printf("Job failed !\n")
 	}
-	if prevStatus != "SUCCEEDED" {
-		err = fmt.Errorf("Job failed !")
-	}
-	return prevStatus, err
+	return status
 }
