@@ -24,9 +24,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"time"
-
-	. "github.com/onsi/gomega"
 )
 
 type RayJobSetup struct {
@@ -50,6 +47,8 @@ type RayJobLogsResponse struct {
 }
 
 type RayClusterClientConfig struct {
+	Address             string
+	Client              *http.Client
 	SkipTlsVerification bool
 }
 
@@ -66,15 +65,28 @@ type RayClusterClient interface {
 	GetJobDetails(jobID string) (*RayJobDetailsResponse, error)
 	GetJobLogs(jobID string) (string, error)
 	GetJobs() ([]map[string]interface{}, error)
-	WaitForJobStatus(test Test, jobID string) string
 }
 
-func NewRayClusterClient(dashboardEndpoint url.URL, config RayClusterClientConfig, bearerToken string) RayClusterClient {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: config.SkipTlsVerification},
-		Proxy:           http.ProxyFromEnvironment,
+var rayClusterApiClient RayClusterClient
+
+func NewRayClusterClient(config RayClusterClientConfig, bearerToken string) (RayClusterClient, error) {
+	if rayClusterApiClient == nil {
+		if config.Client == nil {
+			tr := &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: config.SkipTlsVerification},
+				Proxy:           http.ProxyFromEnvironment,
+			}
+			config.Client = &http.Client{Transport: tr}
+		}
+		endpoint, err := url.Parse(config.Address)
+		if err != nil {
+			return nil, fmt.Errorf("invalid dashboard endpoint address")
+		}
+		rayClusterApiClient = &rayClusterClient{
+			endpoint: *endpoint, httpClient: config.Client, bearerToken: bearerToken,
+		}
 	}
-	return &rayClusterClient{endpoint: dashboardEndpoint, httpClient: &http.Client{Transport: tr}, bearerToken: bearerToken}
+	return rayClusterApiClient, nil
 }
 
 func (client *rayClusterClient) CreateJob(job *RayJobSetup) (response *RayJobResponse, err error) {
@@ -189,32 +201,4 @@ func (client *rayClusterClient) GetJobLogs(jobID string) (logs string, err error
 	jobLogs := RayJobLogsResponse{}
 	err = json.Unmarshal(respData, &jobLogs)
 	return jobLogs.Logs, err
-}
-
-func (client *rayClusterClient) WaitForJobStatus(test Test, jobID string) string {
-	var status string
-	fmt.Printf("Waiting for job to be Succeeded...\n")
-
-	test.Eventually(func() string {
-		resp, err := client.GetJobDetails(jobID)
-		test.Expect(err).ToNot(HaveOccurred())
-		statusVal := resp.Status
-		if statusVal == "SUCCEEDED" || statusVal == "FAILED" {
-			fmt.Printf("JobStatus : %s\n", statusVal)
-			status = statusVal
-			return status
-		}
-		if status != statusVal && statusVal != "SUCCEEDED" {
-			fmt.Printf("JobStatus : %s...\n", statusVal)
-			status = statusVal
-		}
-		return status
-	}, TestTimeoutDouble, 3*time.Second).Should(Or(Equal("SUCCEEDED"), Equal("FAILED")), "Job did not complete within the expected time")
-
-	if status == "SUCCEEDED" {
-		fmt.Printf("Job succeeded !\n")
-	} else {
-		fmt.Printf("Job failed !\n")
-	}
-	return status
 }
