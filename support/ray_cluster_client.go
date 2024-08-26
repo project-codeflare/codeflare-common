@@ -47,9 +47,9 @@ type RayJobLogsResponse struct {
 }
 
 type RayClusterClientConfig struct {
-	Address             string
-	Client              *http.Client
-	SkipTlsVerification bool
+	Address            string
+	Client             *http.Client
+	InsecureSkipVerify bool
 }
 
 var _ RayClusterClient = (*rayClusterClient)(nil)
@@ -64,27 +64,21 @@ type RayClusterClient interface {
 	CreateJob(job *RayJobSetup) (*RayJobResponse, error)
 	GetJobDetails(jobID string) (*RayJobDetailsResponse, error)
 	GetJobLogs(jobID string) (string, error)
-	GetJobs() ([]map[string]interface{}, error)
+	GetJobs() (*[]RayJobDetailsResponse, error)
 }
 
-var rayClusterApiClient RayClusterClient
-
 func NewRayClusterClient(config RayClusterClientConfig, bearerToken string) (RayClusterClient, error) {
-	if rayClusterApiClient == nil {
-		if config.Client == nil {
-			tr := &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: config.SkipTlsVerification},
-				Proxy:           http.ProxyFromEnvironment,
-			}
-			config.Client = &http.Client{Transport: tr}
-		}
-		endpoint, err := url.Parse(config.Address)
-		if err != nil {
-			return nil, fmt.Errorf("invalid dashboard endpoint address")
-		}
-		rayClusterApiClient = &rayClusterClient{
-			endpoint: *endpoint, httpClient: config.Client, bearerToken: bearerToken,
-		}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: config.InsecureSkipVerify},
+		Proxy:           http.ProxyFromEnvironment,
+	}
+	config.Client = &http.Client{Transport: tr}
+	endpoint, err := url.Parse(config.Address)
+	if err != nil {
+		return nil, fmt.Errorf("invalid dashboard endpoint address")
+	}
+	rayClusterApiClient := &rayClusterClient{
+		endpoint: *endpoint, httpClient: config.Client, bearerToken: bearerToken,
 	}
 	return rayClusterApiClient, nil
 }
@@ -115,7 +109,7 @@ func (client *rayClusterClient) CreateJob(job *RayJobSetup) (response *RayJobRes
 	return
 }
 
-func (client *rayClusterClient) GetJobs() ([]map[string]interface{}, error) {
+func (client *rayClusterClient) GetJobs() (response *[]RayJobDetailsResponse, err error) {
 	getAllJobsDetailsURL := client.endpoint.String() + "/api/jobs/"
 
 	req, err := http.NewRequest(http.MethodGet, getAllJobsDetailsURL, nil)
@@ -133,17 +127,18 @@ func (client *rayClusterClient) GetJobs() ([]map[string]interface{}, error) {
 	if resp.StatusCode == 503 {
 		return nil, fmt.Errorf("service unavailable")
 	}
-	body, err := io.ReadAll(resp.Body)
+	respData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-
-	var result []map[string]interface{}
-	err = json.Unmarshal(body, &result)
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("incorrect response code: %d for retrieving Ray Job details, response body: %s", resp.StatusCode, respData)
+	}
+	err = json.Unmarshal(respData, &response)
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	return response, nil
 }
 
 func (client *rayClusterClient) GetJobDetails(jobID string) (response *RayJobDetailsResponse, err error) {
@@ -161,18 +156,22 @@ func (client *rayClusterClient) GetJobDetails(jobID string) (response *RayJobDet
 	if err != nil {
 		return nil, err
 	}
+	if resp.StatusCode == 503 {
+		return nil, fmt.Errorf("service unavailable")
+	}
 
 	respData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}
-
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("incorrect response code: %d for retrieving Ray Job details, response body: %s", resp.StatusCode, respData)
 	}
-
 	err = json.Unmarshal(respData, &response)
-	return
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
 }
 
 func (client *rayClusterClient) GetJobLogs(jobID string) (logs string, err error) {
