@@ -2,7 +2,7 @@
 CODEFLARE_SDK_VERSION ?= 0.9.0
 
 # RAY_VERSION defines the default version of Ray (used for testing)
-RAY_VERSION ?= 2.5.0
+RAY_VERSION ?= 2.35.0
 
 # RAY_IMAGE defines the default container image for Ray (used for testing)
 RAY_IMAGE ?= rayproject/ray:$(RAY_VERSION)
