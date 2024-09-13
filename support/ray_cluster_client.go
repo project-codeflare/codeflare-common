@@ -18,7 +18,6 @@ package support
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -47,39 +46,30 @@ type RayJobLogsResponse struct {
 }
 
 type RayClusterClientConfig struct {
-	Address            string
-	Client             *http.Client
-	InsecureSkipVerify bool
+	Address string
+	Client  *http.Client
 }
 
 var _ RayClusterClient = (*rayClusterClient)(nil)
 
 type rayClusterClient struct {
-	endpoint    url.URL
-	httpClient  *http.Client
-	bearerToken string
+	config RayClusterClientConfig
 }
 
 type RayClusterClient interface {
 	CreateJob(job *RayJobSetup) (*RayJobResponse, error)
 	GetJobDetails(jobID string) (*RayJobDetailsResponse, error)
-	GetJobLogs(jobID string) (string, error)
-	GetJobs() (*[]RayJobDetailsResponse, error)
+	GetJobLogs(jobID string) (*RayJobLogsResponse, error)
+	ListJobs() ([]RayJobDetailsResponse, error)
 }
 
-func NewRayClusterClient(config RayClusterClientConfig, bearerToken string) (RayClusterClient, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: config.InsecureSkipVerify},
-		Proxy:           http.ProxyFromEnvironment,
-	}
-	config.Client = &http.Client{Transport: tr}
+func NewRayClusterClient(config RayClusterClientConfig) (RayClusterClient, error) {
 	endpoint, err := url.Parse(config.Address)
 	if err != nil {
-		return nil, fmt.Errorf("invalid dashboard endpoint address")
+		return nil, fmt.Errorf("invalid dashboard endpoint address: %s", endpoint)
 	}
-	rayClusterApiClient := &rayClusterClient{
-		endpoint: *endpoint, httpClient: config.Client, bearerToken: bearerToken,
-	}
+
+	rayClusterApiClient := &rayClusterClient{config}
 	return rayClusterApiClient, nil
 }
 
@@ -89,12 +79,14 @@ func (client *rayClusterClient) CreateJob(job *RayJobSetup) (response *RayJobRes
 		return
 	}
 
-	createJobURL := client.endpoint.String() + "/api/jobs/"
+	createJobURL := client.config.Address + "/api/jobs/"
 
-	resp, err := client.httpClient.Post(createJobURL, "application/json", bytes.NewReader(marshalled))
+	resp, err := client.config.Client.Post(createJobURL, "application/json", bytes.NewReader(marshalled))
 	if err != nil {
 		return
 	}
+
+	defer resp.Body.Close()
 
 	respData, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -109,95 +101,71 @@ func (client *rayClusterClient) CreateJob(job *RayJobSetup) (response *RayJobRes
 	return
 }
 
-func (client *rayClusterClient) GetJobs() (response *[]RayJobDetailsResponse, err error) {
-	getAllJobsDetailsURL := client.endpoint.String() + "/api/jobs/"
+func (client *rayClusterClient) ListJobs() (response []RayJobDetailsResponse, err error) {
+	getAllJobsDetailsURL := client.config.Address + "/api/jobs/"
 
-	req, err := http.NewRequest(http.MethodGet, getAllJobsDetailsURL, nil)
+	resp, err := client.config.Client.Get(getAllJobsDetailsURL)
 	if err != nil {
-		return nil, err
+		return
 	}
-	if client.bearerToken != "" {
-		req.Header.Set("Authorization", "Bearer "+client.bearerToken)
-	}
-	resp, err := client.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
+
 	defer resp.Body.Close()
-	if resp.StatusCode == 503 {
-		return nil, fmt.Errorf("service unavailable")
-	}
-	respData, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("incorrect response code: %d for retrieving Ray Job details, response body: %s", resp.StatusCode, respData)
-	}
-	err = json.Unmarshal(respData, &response)
-	if err != nil {
-		return nil, err
-	}
-	return response, nil
-}
-
-func (client *rayClusterClient) GetJobDetails(jobID string) (response *RayJobDetailsResponse, err error) {
-	getJobDetailsURL := client.endpoint.String() + "/api/jobs/" + jobID
-
-	req, err := http.NewRequest(http.MethodGet, getJobDetailsURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	if client.bearerToken != "" {
-		req.Header.Set("Authorization", "Bearer "+client.bearerToken)
-	}
-
-	resp, err := client.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode == 503 {
-		return nil, fmt.Errorf("service unavailable")
-	}
 
 	respData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}
+
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("incorrect response code: %d for retrieving Ray Job details, response body: %s", resp.StatusCode, respData)
 	}
+
 	err = json.Unmarshal(respData, &response)
-	if err != nil {
-		return nil, err
-	}
-	return response, nil
+	return
 }
 
-func (client *rayClusterClient) GetJobLogs(jobID string) (logs string, err error) {
-	getJobLogsURL := client.endpoint.String() + "/api/jobs/" + jobID + "/logs"
-	req, err := http.NewRequest(http.MethodGet, getJobLogsURL, nil)
+func (client *rayClusterClient) GetJobDetails(jobID string) (response *RayJobDetailsResponse, err error) {
+	getJobDetailsURL := client.config.Address + "/api/jobs/" + jobID
+
+	resp, err := client.config.Client.Get(getJobDetailsURL)
 	if err != nil {
-		return "", err
+		return
 	}
-	if client.bearerToken != "" {
-		req.Header.Set("Authorization", "Bearer "+client.bearerToken)
-	}
-	resp, err := client.httpClient.Do(req)
-	if err != nil {
-		return "", err
-	}
+
+	defer resp.Body.Close()
 
 	respData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return
 	}
 
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("incorrect response code: %d for retrieving Ray Job logs, response body: %s", resp.StatusCode, respData)
+		return nil, fmt.Errorf("incorrect response code: %d for retrieving Ray Job details, response body: %s", resp.StatusCode, respData)
 	}
 
-	jobLogs := RayJobLogsResponse{}
-	err = json.Unmarshal(respData, &jobLogs)
-	return jobLogs.Logs, err
+	err = json.Unmarshal(respData, &response)
+	return
+}
+
+func (client *rayClusterClient) GetJobLogs(jobID string) (response *RayJobLogsResponse, err error) {
+	getJobLogsURL := client.config.Address + "/api/jobs/" + jobID + "/logs"
+
+	resp, err := client.config.Client.Get(getJobLogsURL)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+
+	respData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("incorrect response code: %d for retrieving Ray Job logs, response body: %s", resp.StatusCode, respData)
+	}
+
+	err = json.Unmarshal(respData, &response)
+	return
 }
