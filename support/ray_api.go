@@ -27,9 +27,9 @@ func GetRayJobAPIDetails(t Test, rayClient RayClusterClient, jobID string) *RayJ
 
 func WriteRayJobAPILogs(t Test, rayClient RayClusterClient, jobID string) {
 	t.T().Helper()
-	logs, err := rayClient.GetJobLogs(jobID)
+	jobLogs, err := rayClient.GetJobLogs(jobID)
 	t.Expect(err).NotTo(gomega.HaveOccurred())
-	WriteToOutputDir(t, "ray-job-log-"+jobID, Log, []byte(logs))
+	WriteToOutputDir(t, "ray-job-log-"+jobID, Log, []byte(jobLogs.Logs))
 }
 
 func RayJobAPIDetails(t Test, rayClient RayClusterClient, jobID string) func(g gomega.Gomega) *RayJobDetailsResponse {
