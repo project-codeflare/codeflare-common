@@ -32,12 +32,3 @@ func GetImageStream(t Test, namespace string, name string) *imagev1.ImageStream 
 
 	return is
 }
-
-func GetImageStreamTag(t Test, namespace string, name string) *imagev1.ImageStreamTag {
-	t.T().Helper()
-
-	istag, err := t.Client().Image().ImageV1().ImageStreamTags(namespace).Get(t.Ctx(), name, metav1.GetOptions{})
-	t.Expect(err).NotTo(gomega.HaveOccurred())
-
-	return istag
-}
