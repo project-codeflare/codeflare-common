@@ -27,6 +27,7 @@ const (
 
 	CodeFlareTestRayVersion   = "CODEFLARE_TEST_RAY_VERSION"
 	CodeFlareTestRayImage     = "CODEFLARE_TEST_RAY_IMAGE"
+	CodeFlareTestRayROCmImage = "CODEFLARE_TEST_RAY_ROCM_IMAGE"
 	CodeFlareTestPyTorchImage = "CODEFLARE_TEST_PYTORCH_IMAGE"
 
 	// The testing output directory, to write output files into.
@@ -76,6 +77,10 @@ func GetRayVersion() string {
 
 func GetRayImage() string {
 	return lookupEnvOrDefault(CodeFlareTestRayImage, RayImage)
+}
+
+func GetRayROCmImage() string {
+	return lookupEnvOrDefault(CodeFlareTestRayROCmImage, RayROCmImage)
 }
 
 func GetPyTorchImage() string {
