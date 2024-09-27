@@ -1,11 +1,8 @@
-# CODEFLARE_SDK_VERSION defines the default version of the CodeFlare SDK
-CODEFLARE_SDK_VERSION ?= 0.9.0
-
 # RAY_VERSION defines the default version of Ray (used for testing)
 RAY_VERSION ?= 2.35.0
 
 # RAY_IMAGE defines the default container image for Ray (used for testing)
-RAY_IMAGE ?= rayproject/ray:$(RAY_VERSION)
+RAY_IMAGE ?= quay.io/modh/ray:2.35.0-py39-cu121
 
 ##@ Development
 
@@ -21,7 +18,6 @@ defaults:
 	@echo "// ***********************" >> $(DEFAULTS_TEST_FILE)
 	@echo "" >> $(DEFAULTS_TEST_FILE)
 	@echo "const (" >> $(DEFAULTS_TEST_FILE)
-	@echo "  CodeFlareSDKVersion = \"$(CODEFLARE_SDK_VERSION)\"" >> $(DEFAULTS_TEST_FILE)
 	@echo "  RayVersion = \"$(RAY_VERSION)\"" >> $(DEFAULTS_TEST_FILE)
 	@echo "  RayImage = \"$(RAY_IMAGE)\"" >> $(DEFAULTS_TEST_FILE)
 	@echo "" >> $(DEFAULTS_TEST_FILE)

@@ -8,21 +8,6 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestGetCodeFlareSDKVersion(t *testing.T) {
-
-	g := gomega.NewGomegaWithT(t)
-	// Set the environment variable.
-	os.Setenv(CodeFlareTestSdkVersion, "1.2.3")
-
-	// Get the version.
-	version := GetCodeFlareSDKVersion()
-
-	// Assert that the version is correct.
-
-	g.Expect(version).To(gomega.Equal("1.2.3"), "Expected version 1.2.3, but got %s", version)
-
-}
-
 func TestGetRayVersion(t *testing.T) {
 
 	g := gomega.NewGomegaWithT(t)
