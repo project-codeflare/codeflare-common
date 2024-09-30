@@ -40,7 +40,7 @@ func GetOpenShiftPrometheusApiClient(t Test) prometheusapiv1.API {
 		}
 		client, err := prometheusapi.NewClient(prometheusapi.Config{
 			Address: "https://" + prometheusOpenShiftRoute.Status.Ingress[0].Host,
-			Client:  &http.Client{Transport: prometheusconfig.NewAuthorizationCredentialsRoundTripper("Bearer", prometheusconfig.Secret(t.Config().BearerToken), tr)},
+			Client:  &http.Client{Transport: prometheusconfig.NewAuthorizationCredentialsRoundTripper("Bearer", prometheusconfig.NewInlineSecret(t.Config().BearerToken), tr)},
 		})
 		t.Expect(err).NotTo(HaveOccurred())
 
