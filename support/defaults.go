@@ -5,7 +5,9 @@ package support
 // ***********************
 
 const (
-	RayVersion   = "2.35.0"
-	RayImage     = "quay.io/modh/ray:2.35.0-py39-cu121"
-	RayROCmImage = "quay.io/modh/ray:2.35.0-py39-rocm61"
+	RayVersion        = "2.35.0"
+	RayImage          = "quay.io/modh/ray:2.35.0-py39-cu121"
+	RayROCmImage      = "quay.io/modh/ray:2.35.0-py39-rocm61"
+	RayTorchCudaImage = "quay.io/rhoai/ray:2.35.0-py39-cu121-torch24-fa26"
+	RayTorchROCmImage = "quay.io/rhoai/ray:2.35.0-py39-rocm61-torch24-fa26"
 )
