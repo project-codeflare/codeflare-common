@@ -25,10 +25,12 @@ const (
 	// The environment variables hereafter can be used to change the components
 	// used for testing.
 
-	CodeFlareTestRayVersion   = "CODEFLARE_TEST_RAY_VERSION"
-	CodeFlareTestRayImage     = "CODEFLARE_TEST_RAY_IMAGE"
-	CodeFlareTestRayROCmImage = "CODEFLARE_TEST_RAY_ROCM_IMAGE"
-	CodeFlareTestPyTorchImage = "CODEFLARE_TEST_PYTORCH_IMAGE"
+	CodeFlareTestRayVersion        = "CODEFLARE_TEST_RAY_VERSION"
+	CodeFlareTestRayImage          = "CODEFLARE_TEST_RAY_IMAGE"
+	CodeFlareTestRayROCmImage      = "CODEFLARE_TEST_RAY_ROCM_IMAGE"
+	CodeFlareTestRayTorchCudaImage = "CODEFLARE_TEST_RAY_TORCH_CUDA_IMAGE"
+	CodeFlareTestRayTorchROCmImage = "CODEFLARE_TEST_RAY_TORCH_ROCM_IMAGE"
+	CodeFlareTestPyTorchImage      = "CODEFLARE_TEST_PYTORCH_IMAGE"
 
 	// The testing output directory, to write output files into.
 	CodeFlareTestOutputDir = "CODEFLARE_TEST_OUTPUT_DIR"
@@ -81,6 +83,14 @@ func GetRayImage() string {
 
 func GetRayROCmImage() string {
 	return lookupEnvOrDefault(CodeFlareTestRayROCmImage, RayROCmImage)
+}
+
+func GetRayTorchCudaImage() string {
+	return lookupEnvOrDefault(CodeFlareTestRayTorchCudaImage, RayTorchCudaImage)
+}
+
+func GetRayTorchROCmImage() string {
+	return lookupEnvOrDefault(CodeFlareTestRayTorchROCmImage, RayTorchROCmImage)
 }
 
 func GetPyTorchImage() string {
