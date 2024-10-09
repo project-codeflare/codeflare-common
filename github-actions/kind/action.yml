@@ -10,6 +10,14 @@ inputs:
     description: "Name of the KinD cluster"
     required: false
     default: cluster
+  worker-nodes:
+    description: "Number of worker nodes"
+    required: false
+    default: 0
+  label-prefix:
+    description: "Prefix to add to worker node labels"
+    required: false
+    default: worker
 
 runs:
   using: "composite"
@@ -29,11 +37,23 @@ runs:
       run: |
         podman run -d -p 5000:5000 --name registry registry:2.8.1
 
+        export NODE_IMAGE="kindest/node:v1.25.3@sha256:f52781bc0d7a19fb6c405c2af83abfeb311f130707a0e219175677e366cc45d1"
+
         export REGISTRY_ADDRESS=$(hostname -i):5000
         echo "REGISTRY_ADDRESS=${REGISTRY_ADDRESS}" >> $GITHUB_ENV
         echo "Container image registry started at ${REGISTRY_ADDRESS}"
 
         KIND_CONFIG_FILE=${{ env.TEMP_DIR }}/kind.yaml
+
+        WORKER_NODES=${{ inputs.worker-nodes }}
+        LABEL_PREFIX=${{ inputs.label-prefix }}
+
+        if [ "$WORKER_NODES" -gt 0 ]; then
+          for i in $(seq 1 $WORKER_NODES); do
+            sed -i "/^nodes:/a \ \ - role: worker\n    image: ${NODE_IMAGE}\n    labels:\n      ${LABEL_PREFIX}-${i}: true" ${GITHUB_ACTION_PATH}/resources/kind.yaml
+          done
+        fi
+
         echo "KIND_CONFIG_FILE=${KIND_CONFIG_FILE}" >> $GITHUB_ENV
         envsubst < ${GITHUB_ACTION_PATH}/resources/kind.yaml > ${KIND_CONFIG_FILE}
 
