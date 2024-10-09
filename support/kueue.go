@@ -65,18 +65,13 @@ func CreateKueueClusterQueue(t Test, clusterQueueSpec kueuev1beta1.ClusterQueueS
 	return clusterQueue
 }
 
-var AsDefaultQueue = defaultLocalQueueOption{}
-
-type defaultLocalQueueOption struct {
-}
-
-func (d defaultLocalQueueOption) applyTo(to *kueuev1beta1.LocalQueue) error {
+var AsDefaultQueue = ErrorOption[*kueuev1beta1.LocalQueue](func(to *kueuev1beta1.LocalQueue) error {
 	if to.Annotations == nil {
 		to.Annotations = make(map[string]string)
 	}
 	to.Annotations["kueue.x-k8s.io/default-queue"] = "true"
 	return nil
-}
+})
 
 func CreateKueueLocalQueue(t Test, namespace string, clusterQueueName string, options ...Option[*kueuev1beta1.LocalQueue]) *kueuev1beta1.LocalQueue {
 	t.T().Helper()
@@ -97,7 +92,7 @@ func CreateKueueLocalQueue(t Test, namespace string, clusterQueueName string, op
 
 	//Apply options
 	for _, opt := range options {
-		t.Expect(opt.applyTo(localQueue)).To(gomega.Succeed())
+		t.Expect(opt.ApplyTo(localQueue)).To(gomega.Succeed())
 	}
 
 	localQueue, err := t.Client().Kueue().KueueV1beta1().LocalQueues(localQueue.Namespace).Create(t.Ctx(), localQueue, metav1.CreateOptions{})
