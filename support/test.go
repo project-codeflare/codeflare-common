@@ -42,18 +42,18 @@ type Test interface {
 }
 
 type Option[T any] interface {
-	applyTo(to T) error
+	ApplyTo(to T) error
 }
 
-type errorOption[T any] func(to T) error
+type ErrorOption[T any] func(to T) error
 
 // nolint: unused
 // To be removed when the false-positivity is fixed.
-func (o errorOption[T]) applyTo(to T) error {
+func (o ErrorOption[T]) ApplyTo(to T) error {
 	return o(to)
 }
 
-var _ Option[any] = errorOption[any](nil)
+var _ Option[any] = ErrorOption[any](nil)
 
 func With(t *testing.T) Test {
 	return WithConfig(t, nil)
