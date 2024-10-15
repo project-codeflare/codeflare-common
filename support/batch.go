@@ -20,6 +20,7 @@ import (
 	"github.com/onsi/gomega"
 
 	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,4 +35,21 @@ func Job(t Test, namespace, name string) func(g gomega.Gomega) *batchv1.Job {
 func GetJob(t Test, namespace, name string) *batchv1.Job {
 	t.T().Helper()
 	return Job(t, namespace, name)(t)
+}
+
+func JobConditionCompleted(job *batchv1.Job) corev1.ConditionStatus {
+	return JobCondition(job, batchv1.JobComplete)
+}
+
+func JobConditionFailed(job *batchv1.Job) corev1.ConditionStatus {
+	return JobCondition(job, batchv1.JobFailed)
+}
+
+func JobCondition(job *batchv1.Job, conditionType batchv1.JobConditionType) corev1.ConditionStatus {
+	for _, condition := range job.Status.Conditions {
+		if condition.Type == conditionType {
+			return condition.Status
+		}
+	}
+	return corev1.ConditionUnknown
 }
