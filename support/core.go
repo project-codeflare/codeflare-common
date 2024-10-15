@@ -53,6 +53,52 @@ func CreateConfigMap(t Test, namespace string, content map[string][]byte) *corev
 	return configMap
 }
 
+func CreateSecret(t Test, namespace string, content map[string]string) *corev1.Secret {
+	t.T().Helper()
+
+	secret := &corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "Secret",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: "secret-",
+			Namespace:    namespace,
+		},
+		StringData: content,
+		Immutable:  Ptr(true),
+	}
+
+	secret, err := t.Client().Core().CoreV1().Secrets(namespace).Create(t.Ctx(), secret, metav1.CreateOptions{})
+	t.Expect(err).NotTo(gomega.HaveOccurred())
+	t.T().Logf("Created Secret %s/%s successfully", secret.Namespace, secret.Name)
+
+	return secret
+}
+
+func CreateSecretBinary(t Test, namespace string, content map[string][]byte) *corev1.Secret {
+	t.T().Helper()
+
+	secret := &corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "Secret",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: "secret-",
+			Namespace:    namespace,
+		},
+		Data:      content,
+		Immutable: Ptr(true),
+	}
+
+	secret, err := t.Client().Core().CoreV1().Secrets(namespace).Create(t.Ctx(), secret, metav1.CreateOptions{})
+	t.Expect(err).NotTo(gomega.HaveOccurred())
+	t.T().Logf("Created binary Secret %s/%s successfully", secret.Namespace, secret.Name)
+
+	return secret
+}
+
 func Raw(t Test, obj runtime.Object) runtime.RawExtension {
 	t.T().Helper()
 	data, err := json.Marshal(obj)
