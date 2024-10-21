@@ -50,7 +50,7 @@ runs:
 
         if [ "$WORKER_NODES" -gt 0 ]; then
           for i in $(seq 1 $WORKER_NODES); do
-            sed -i "/^nodes:/a \ \ - role: worker\n    image: ${NODE_IMAGE}\n    labels:\n      ${LABEL_PREFIX}-${i}: true" ${GITHUB_ACTION_PATH}/resources/kind.yaml
+            sed -i "/^nodes:/a \ \ - role: worker\n    image: ${NODE_IMAGE}\n    labels:\n      ${LABEL_PREFIX}-${i}: true\n    extraMounts:\n      - hostPath: /dev/null\n        containerPath: /var/run/nvidia-container-devices/all" ${GITHUB_ACTION_PATH}/resources/kind.yaml
           done
         fi
 
