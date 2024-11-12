@@ -58,6 +58,9 @@ const (
 	storageSecretKey       = "AWS_SECRET_ACCESS_KEY"
 	storageBucketName      = "AWS_STORAGE_BUCKET"
 	storageBucketMnistDir  = "AWS_STORAGE_BUCKET_MNIST_DIR"
+
+	// Name of existing namespace to be used for test
+	testNamespaceNameEnvVar = "TEST_NAMESPACE_NAME"
 )
 
 type ClusterType string
@@ -172,6 +175,10 @@ func GetPipIndexURL() string {
 
 func GetPipTrustedHost() string {
 	return lookupEnvOrDefault(pipTrustedHost, "")
+}
+
+func GetTestNamespaceName() (string, bool) {
+	return os.LookupEnv(testNamespaceNameEnvVar)
 }
 
 func lookupEnvOrDefault(key, value string) string {
