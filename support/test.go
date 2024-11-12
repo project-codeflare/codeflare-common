@@ -26,6 +26,8 @@ import (
 	"github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
 
@@ -39,6 +41,7 @@ type Test interface {
 	gomega.Gomega
 
 	NewTestNamespace(...Option[*corev1.Namespace]) *corev1.Namespace
+	CreateOrGetTestNamespace(...Option[*corev1.Namespace]) *corev1.Namespace
 }
 
 type Option[T any] interface {
@@ -155,4 +158,25 @@ func (t *T) NewTestNamespace(options ...Option[*corev1.Namespace]) *corev1.Names
 		deleteTestNamespace(t, namespace)
 	})
 	return namespace
+}
+
+func (t *T) CreateOrGetTestNamespace(options ...Option[*corev1.Namespace]) *corev1.Namespace {
+	t.T().Helper()
+
+	testNamespaceName, testNamespaceNameExists := GetTestNamespaceName()
+
+	if testNamespaceNameExists {
+		// Verify that the namespace really exists and return it, create it if doesn't exist yet
+		namespace, err := t.Client().Core().CoreV1().Namespaces().Get(t.Ctx(), testNamespaceName, metav1.GetOptions{})
+		if err == nil {
+			t.T().Logf("Using the namespace name which is provided using environment variable..")
+			return namespace
+		} else if errors.IsNotFound(err) {
+			t.T().Logf("%s namespace doesn't exists. Creating ...", testNamespaceName)
+			return CreateTestNamespaceWithName(t, testNamespaceName, options...)
+		} else {
+			t.T().Fatalf("Error retrieving namespace with name `%s`: %v", testNamespaceName, err)
+		}
+	}
+	return t.NewTestNamespace(options...)
 }
