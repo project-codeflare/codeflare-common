@@ -53,6 +53,21 @@ func TestGetPyTorchImage(t *testing.T) {
 
 }
 
+func TestGetTrainingImage(t *testing.T) {
+
+	g := gomega.NewGomegaWithT(t)
+	// Set the environment variable.
+	os.Setenv(CodeFlareTestTrainingImage, "training/training:latest")
+
+	// Get the image.
+	image := GetCudaTrainingImage()
+
+	// Assert that the image is correct.
+
+	g.Expect(image).To(gomega.Equal("training/training:latest"), "Expected image training/training:latest, but got %s", image)
+
+}
+
 func TestGetClusterID(t *testing.T) {
 
 	g := gomega.NewGomegaWithT(t)

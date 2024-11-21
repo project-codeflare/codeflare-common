@@ -10,4 +10,6 @@ const (
 	RayROCmImage      = "quay.io/modh/ray:2.35.0-py311-rocm61"
 	RayTorchCudaImage = "quay.io/rhoai/ray:2.35.0-py311-cu121-torch24-fa26"
 	RayTorchROCmImage = "quay.io/rhoai/ray:2.35.0-py311-rocm61-torch24-fa26"
+	TrainingCudaImage = "quay.io/modh/training:py311-cuda121-torch241"
+	TrainingROCmImage = "quay.io/modh/training:py311-rocm61-torch241"
 )
