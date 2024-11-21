@@ -25,9 +25,10 @@ const (
 	// The environment variables hereafter can be used to change the components
 	// used for testing.
 
-	CodeFlareTestRayVersion   = "CODEFLARE_TEST_RAY_VERSION"
-	CodeFlareTestRayImage     = "CODEFLARE_TEST_RAY_IMAGE"
-	CodeFlareTestPyTorchImage = "CODEFLARE_TEST_PYTORCH_IMAGE"
+	CodeFlareTestRayVersion    = "CODEFLARE_TEST_RAY_VERSION"
+	CodeFlareTestRayImage      = "CODEFLARE_TEST_RAY_IMAGE"
+	CodeFlareTestPyTorchImage  = "CODEFLARE_TEST_PYTORCH_IMAGE"
+	CodeFlareTestTrainingImage = "CODEFLARE_TEST_TRAINING_IMAGE"
 
 	// The testing output directory, to write output files into.
 	CodeFlareTestOutputDir = "CODEFLARE_TEST_OUTPUT_DIR"
@@ -95,6 +96,14 @@ func GetRayTorchROCmImage() string {
 
 func GetPyTorchImage() string {
 	return lookupEnvOrDefault(CodeFlareTestPyTorchImage, "pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime")
+}
+
+func GetCudaTrainingImage() string {
+	return lookupEnvOrDefault(CodeFlareTestTrainingImage, TrainingCudaImage)
+}
+
+func GetROCmTrainingImage() string {
+	return lookupEnvOrDefault(CodeFlareTestTrainingImage, TrainingROCmImage)
 }
 
 func GetInstascaleOcmSecret() (string, string) {
