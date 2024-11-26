@@ -7,8 +7,6 @@ runs:
     - name: Install Podman
       run: |
         sudo apt-get -y install podman
-        loginctl enable-linger 1002
-        # To avoid Error: error creating build container: loading drop-in registries configuration "/etc/containers/registries.conf.d/local.conf": open /etc/containers/registries.conf.d/local.conf: permission denied
         mkdir ~/.config
         cp -r /etc/containers ~/.config/containers
       shell: bash
