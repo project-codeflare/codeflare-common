@@ -115,19 +115,25 @@ func GetPods(t Test, namespace string, options metav1.ListOptions) []corev1.Pod 
 	return pods.Items
 }
 
-func GetPodLogs(t Test, pod *corev1.Pod, options corev1.PodLogOptions) []byte {
+func PodLog(t Test, namespace, name string, options corev1.PodLogOptions) func(g gomega.Gomega) string {
+	return func(g gomega.Gomega) string {
+		stream, err := t.Client().Core().CoreV1().Pods(namespace).GetLogs(name, &options).Stream(t.Ctx())
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+
+		defer func() {
+			g.Expect(stream.Close()).To(gomega.Succeed())
+		}()
+
+		bytes, err := io.ReadAll(stream)
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+
+		return string(bytes)
+	}
+}
+
+func GetPodLog(t Test, namespace, name string, options corev1.PodLogOptions) string {
 	t.T().Helper()
-	stream, err := t.Client().Core().CoreV1().Pods(pod.GetNamespace()).GetLogs(pod.GetName(), &options).Stream(t.Ctx())
-	t.Expect(err).NotTo(gomega.HaveOccurred())
-
-	defer func() {
-		t.Expect(stream.Close()).To(gomega.Succeed())
-	}()
-
-	bytes, err := io.ReadAll(stream)
-	t.Expect(err).NotTo(gomega.HaveOccurred())
-
-	return bytes
+	return PodLog(t, namespace, name, options)(t)
 }
 
 func storeAllPodLogs(t Test, namespace *corev1.Namespace) {
