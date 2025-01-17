@@ -56,3 +56,38 @@ func TestResourceName(t *testing.T) {
 	test.Expect(err).To(gomega.BeNil(), "Expected no error, but got '%v'", err)
 	test.Expect(resourceName).To(gomega.Equal("test-resource"), "Expected resource name 'test-resource', but got '%s'", resourceName)
 }
+
+func TestGetServiceAccount(t *testing.T) {
+	test := NewTest(t)
+
+	createdSa := &corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-sa",
+			Namespace: "my-namespace",
+		},
+	}
+
+	test.client.Core().CoreV1().ServiceAccounts("my-namespace").Create(test.ctx, createdSa, metav1.CreateOptions{})
+	sa := GetServiceAccount(test, "my-namespace", "my-sa")
+
+	test.Expect(sa.Name).To(gomega.Equal("my-sa"))
+	test.Expect(sa.Namespace).To(gomega.Equal("my-namespace"))
+}
+
+func TestGetServiceAccounts(t *testing.T) {
+	test := NewTest(t)
+
+	createdSa := &corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-sa-1",
+			Namespace: "my-namespace",
+		},
+	}
+
+	test.client.Core().CoreV1().ServiceAccounts("my-namespace").Create(test.ctx, createdSa, metav1.CreateOptions{})
+	sas := GetServiceAccounts(test, "my-namespace")
+
+	test.Expect(len(sas)).To(gomega.Equal(1))
+	test.Expect(sas[0].Name).To(gomega.Equal("my-sa-1"))
+	test.Expect(sas[0].Namespace).To(gomega.Equal("my-namespace"))
+}
