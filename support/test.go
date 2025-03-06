@@ -80,6 +80,13 @@ func WithConfig(t *testing.T, cfg *rest.Config) Test {
 	}
 }
 
+func WithNamespaceName(name string) Option[*corev1.Namespace] {
+	return ErrorOption[*corev1.Namespace](func(ns *corev1.Namespace) error {
+		ns.Name = name
+		return nil
+	})
+}
+
 type T struct {
 	*gomega.WithT
 	t *testing.T
