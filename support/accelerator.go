@@ -13,6 +13,6 @@ type Accelerator struct {
 }
 
 // Method to check if the accelerator is a GPU
-func (a Accelerator) isGpu() bool {
+func (a Accelerator) IsGpu() bool {
 	return a != CPU
 }
