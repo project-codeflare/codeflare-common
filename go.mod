@@ -2,8 +2,6 @@ module github.com/project-codeflare/codeflare-common
 
 go 1.23.0
 
-toolchain go1.23.4
-
 require (
 	github.com/kubeflow/training-operator v1.8.1
 	github.com/onsi/gomega v1.36.1
