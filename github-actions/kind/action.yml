@@ -37,7 +37,7 @@ runs:
       run: |
         podman run -d -p 5000:5000 --name registry registry:2.8.1
 
-        export NODE_IMAGE="kindest/node:v1.25.3@sha256:f52781bc0d7a19fb6c405c2af83abfeb311f130707a0e219175677e366cc45d1"
+        export NODE_IMAGE="kindest/node:v1.26.0@sha256:691e24bd2417609db7e589e1a479b902d2e209892a10ce375fab60a8407c7352"
 
         export REGISTRY_ADDRESS=$(hostname -i):5000
         echo "REGISTRY_ADDRESS=${REGISTRY_ADDRESS}" >> $GITHUB_ENV
