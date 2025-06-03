@@ -1,8 +1,8 @@
 # RAY_VERSION defines the default version of Ray (used for testing)
-RAY_VERSION ?= 2.35.0
+RAY_VERSION ?= 2.44.1
 
 # RAY_IMAGE defines the default container image for Ray (used for testing)
-RAY_IMAGE ?= quay.io/modh/ray:2.35.0-py39-cu121
+RAY_IMAGE ?= quay.io/modh/ray:2.44.1-py311-cu121
 
 ##@ Development
 
