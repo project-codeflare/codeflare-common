@@ -94,7 +94,7 @@ runs:
       shell: bash
       run: |
         # Based on https://sixfeetup.com/blog/local-development-with-wildcard-dns-on-linux
-        sudo apt-get install dnsmasq
+        sudo apt-get -y install dnsmasq
 
         sudo sed -i -E "s/#DNS=/DNS=127.0.0.2/" /etc/systemd/resolved.conf
         sudo sed -i -E "s/#Domains=/Domains=~${{ inputs.node-hostname }}/" /etc/systemd/resolved.conf
