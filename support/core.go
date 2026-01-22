@@ -191,6 +191,38 @@ func CreateServiceAccount(t Test, namespace string) *corev1.ServiceAccount {
 	return serviceAccount
 }
 
+func ServiceAccount(t Test, namespace, name string) func(g gomega.Gomega) *corev1.ServiceAccount {
+	return func(g gomega.Gomega) *corev1.ServiceAccount {
+		sa, err := t.Client().Core().CoreV1().ServiceAccounts(namespace).Get(t.Ctx(), name, metav1.GetOptions{})
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+		return sa
+	}
+}
+
+func GetServiceAccount(t Test, namespace, name string) *corev1.ServiceAccount {
+	t.T().Helper()
+	return ServiceAccount(t, namespace, name)(t)
+}
+
+func ServiceAccounts(t Test, namespace string) func(g gomega.Gomega) []*corev1.ServiceAccount {
+	return func(g gomega.Gomega) []*corev1.ServiceAccount {
+		sas, err := t.Client().Core().CoreV1().ServiceAccounts(namespace).List(t.Ctx(), metav1.ListOptions{})
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+
+		sasp := []*corev1.ServiceAccount{}
+		for _, v := range sas.Items {
+			sasp = append(sasp, &v)
+		}
+
+		return sasp
+	}
+}
+
+func GetServiceAccounts(t Test, namespace string) []*corev1.ServiceAccount {
+	t.T().Helper()
+	return ServiceAccounts(t, namespace)(t)
+}
+
 func CreatePersistentVolumeClaim(t Test, namespace string, storageSize string, accessMode ...corev1.PersistentVolumeAccessMode) *corev1.PersistentVolumeClaim {
 	t.T().Helper()
 

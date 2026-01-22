@@ -7,7 +7,7 @@ runs:
     - name: Install Podman
       run: |
         sudo apt-get -y install podman
-        mkdir ~/.config
+        mkdir --parents ~/.config
         cp -r /etc/containers ~/.config/containers
       shell: bash
 
